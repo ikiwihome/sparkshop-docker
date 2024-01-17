@@ -1,28 +1,5 @@
-<p align="center">
-<img src="https://lfs.k.topthink.com/lfs/a49ec83f2a11db2b474501fc4b15f9fe9e8fe0b31ffddda2487d916a559d3b51.dat" width="360" />
-</p>
-
+<h3 align="center">Sparkshop 最新版 整合php-fpm, nginx, redis环境为一个容器的镜像文件</h3>
 <div align="center">
-
-[![Gitee star](https://gitee.com/nickbai/sparkshop/badge/star.svg?theme=gvp)](https://gitee.com/nickbai/sparkshop/stargazers)
-[![Gitee fork](https://gitee.com/nickbai/sparkshop/badge/fork.svg?theme=gvp)](https://gitee.com/nickbai/sparkshop/members)
-[![License](https://img.shields.io/badge/license-Apache2.0-green)](https://gitee.com/nickbai/sparkshop/blob/master/LICENSE)
-
-</div>
-
-<h3 align="center">SparkShop 坚持做优秀的商城系统</h3>
-<div align="center">
-
-```shell
-如果对您有帮助，您可以点右上角 “Star” 收藏一下 ，您的star就是我开发的动力，感谢！
-```
-### 加QQ [1902822973](http://wpa.qq.com/msgrd?v=3&uin=1902822973&site=qq&menu=yes)
- **付费版目前比免费版多出的内容：积分商城、积分签到、积分抵扣、拼团、在线客服、商品统计、公众号菜单、公众号回复、公众号设置、卡密虚拟产品、砍价、付费会员（vip会员）**  
-**正在迭代的功能：V2.0 UI外观全面重构**   
-**更多的优质内容 PRO 版本持续迭代中...**  
-![输入图片说明](screenshot/kefu.jpg)
-![输入图片说明](screenshot/ad.jpeg)
-</div>
 
 ## 介绍
 SparkShop(星火商城)是基于thinkphp6 + elementui的开源免费可商用的高性能商城系统；包含小程序商城、H5商城、公众号商城、PC商城、App，支持页面diy、秒杀、优惠券、积分、分销、会员等级。营销功能采用插件化的方式方便扩展、二次开发没系统大小任意控制。  
@@ -51,6 +28,11 @@ https://sparkshop.cn
 ## 安装教程
 
 https://doc.sparkshop.cn
+
+执行docker命令
+docker run -d --name sparkshop -h sparkshop --restart=unless-stopped -e TZ="Asia/Shanghai" -p 80:80 ikiwicc/sparkshop:latest
+
+打开http://127.0.0.1:80 或者 http://localhost 进入安装界面
 
 ## 插件开发系列视频
 SparkShop开源商城插件开发-1、创建插件 [https://www.bilibili.com/video/BV158411Q7cH/](https://www.bilibili.com/video/BV158411Q7cH/)  
