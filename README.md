@@ -1,5 +1,4 @@
 <h3 align="center">Sparkshop 最新版 整合php-fpm, nginx, redis环境为一个容器的镜像文件</h3>
-<div align="center">
 
 ## 介绍
 SparkShop(星火商城)是基于thinkphp6 + elementui的开源免费可商用的高性能商城系统；包含小程序商城、H5商城、公众号商城、PC商城、App，支持页面diy、秒杀、优惠券、积分、分销、会员等级。营销功能采用插件化的方式方便扩展、二次开发没系统大小任意控制。  
