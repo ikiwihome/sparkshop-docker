@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="zh-CN" xml:lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>我的余额</title>
+    <link rel="stylesheet" href="{__CSS__}/bootstrap.min.css">
+    <link rel="stylesheet" href="{__CSS__}/style.css">
+    <link rel="stylesheet" href="{__CSS__}/iconfont.css">
+    <link rel="stylesheet" href="{__CSS__}/user.css">
+    <link rel="stylesheet" href="/static/js/layui/css/layui.css">
+    <script src="{__JS__}/jquery.min.js"></script>
+    <script src="/static/js/layui/layui.js"></script>
+    <script src="{__JS__}/bootstrap.bundle.min.js"></script>
+    <script src="{__JS__}/meanmenu.min.js"></script>
+</head>
+<body style="background: #f9f9f9;">
+{include file="public/header_no_nav"}
+<div class="user_container">
+    <div style="color: #757575">
+        <a href="/">首页</a> > 用户中心
+    </div>
+    <div class="user_content">
+        {include file="public/user_menu"}
+        <div class="content_detail" style="padding: 20px 20px;">
+            <div class="layui-form layui-row layui-col-space16">
+                <div class="layui-col-md3">
+                    <select name="type" id="type">
+                        <option value="0">全部</option>
+                        <option value="1">消费</option>
+                        <option value="2">充值</option>
+                    </select>
+                </div>
+                <div class="layui-col-md6">
+                    <button type="button" class="layui-btn layui-btn-danger" onclick="search()"> <i class="layui-icon layui-icon-search"></i> 搜索</button>
+                    <button type="button" class="layui-btn layui-btn-primary" onclick="recharge()"> <i class="layui-icon layui-icon-rmb"></i> 充值</button>
+                </div>
+                <div class="layui-col-md3" style="text-align: center">
+                    我的余额: <span style="color:#e93323" id="money">￥ 0</span>
+                </div>
+            </div>
+            <table class="layui-hide" id="tableData" style="margin-top: 10px"></table>
+            <script type="text/html" id="table-page-bar"></script>
+        </div>
+    </div>
+</div>
+{include file="public/footer"}
+<div id="recharge" style="display:none;">
+    <form class="layui-form" action="" style="padding: 10px">
+        <div class="layui-form-item">
+            <label class="layui-form-label" style="width: 110px">充值金额</label>
+            <div class="layui-input-block">
+                <input type="number" name="amount" lay-verify="required" placeholder="请输入" autocomplete="off" class="layui-input" value="100">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label" style="width: 110px">支付方式</label>
+            <div class="layui-input-block">
+                {if isset($payWayMap['wechat_pay']) && $payWayMap['wechat_pay'] == 1}
+                <input type="radio" name="pay_way" value="wechat_pay" title="微信" checked>
+                {/if}
+                {if isset($payWayMap['alipay']) && $payWayMap['alipay'] == 1}
+                <input type="radio" name="pay_way" value="alipay" title="支付宝">
+                {/if}
+                {if $pay_way == ''}
+                <span style="font-size: 14px;color: #FF5722;top: 10px;position: relative">暂无可用的支付方式</span>
+                {/if}
+            </div>
+        </div>
+        <div class="layui-form-item" style="margin-top: 60px">
+            <div class="layui-input-block">
+                <button type="submit" class="layui-btn" lay-submit lay-filter="order_submit">立即提交</button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<div id="pay-box" style="display: none">
+    <div class="pay-box">
+        <div class="header">请使用<span>支付宝</span>扫描下方二维码</div>
+        <div id="qrcode" class="qrcode"></div>
+        <div class="goods-title"></div>
+        <div class="order-price"></div>
+        <div class="payed">我已支付</div>
+        <div class="notice">提示：未完成支付前，请勿关闭此窗口。支付完成后可以点击上方我已支付按钮。</div>
+    </div>
+</div>
+
+<div class="go-top">
+    <i class="iconfont icon-yooxi"></i>
+    <i class="iconfont icon-yooxi"></i>
+</div>
+<script src="{__JS__}/custom.js"></script>
+<script src="{__JS__}/qrcode.min.js"></script>
+<script src="{__JS__}/recharge.js"></script>
+</body>
+</html>

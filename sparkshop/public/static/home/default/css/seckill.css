@@ -1,0 +1,41 @@
+.box-height {
+    min-height: 700px;
+    overflow: hidden;
+    margin-bottom: 50px;
+    margin-top: 20px;
+}
+.middle-header {
+    background: #fff;
+}
+.footer-area {
+    background: #fff;
+}
+.seckill-div {
+    min-height: calc(100vh - 610px);
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+.seckill-banner {
+    width: 100%;
+    height: 60px;
+    background: #fff;
+}
+.seckill-banner .time {
+    float: right;
+    position: relative;
+    top: -40px;
+    right: 20px;
+}
+.styleAll {color: #fff !important;background-color:#e93323 !important}
+.seckill-title {
+    width: 200px;
+    position: relative;
+    font-size: 24px;
+    font-weight: 500;
+    color: #e93323;
+    top: 12px;
+    left: 20px;
+}
+.layui-laypage .layui-laypage-curr .layui-laypage-em {
+    background-color: #e93323 !important;
+}

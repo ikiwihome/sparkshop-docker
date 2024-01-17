@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>分销设置</title>
+  <link rel="stylesheet" href="{__CSS__}/element_ui.css"/>
+  <link rel="stylesheet" href="{__CSS__}/style.css"/>
+  <script src="{__JS__}/vue2.js"></script>
+  <script src="{__JS__}/element_ui.js"></script>
+  <script src="{__JS__}/axios.min.js"></script>
+  <script src="{__JS__}/request.js"></script>
+</head>
+<body>
+{include file="../../../app/admin/view/default/components/goodsSelect"}
+<div id="app">
+  <div class="app-loading" v-if="pageLoading">
+    <div class="app-loading__logo">
+      <img src="{__IMG__}/logo.png"/>
+    </div>
+    <div class="app-loading__loader"></div>
+    <div class="app-loading__title">SparkShop</div>
+  </div>
+  <el-card class="box-card" v-else>
+    <div slot="header" class="clearfix">
+      <span>分销设置</span>
+    </div>
+    <el-tabs v-model="activeName">
+      <el-tab-pane label="分销模式" name="first">
+        <el-form ref="form" :model="baseForm" label-width="150px">
+          <el-form-item label="分销开启">
+            <el-radio :label="1" v-model="baseForm.agent_open">开启</el-radio>
+            <el-radio :label="2" v-model="baseForm.agent_open">关闭</el-radio>
+          </el-form-item>
+          <el-form-item label="分销模式">
+            <el-radio :label="1" v-model="baseForm.agent_type">指定分销</el-radio>
+            <el-radio :label="2" v-model="baseForm.agent_type">人人分销</el-radio>
+            <el-radio :label="3" v-model="baseForm.agent_type">满额分销</el-radio>
+            <el-radio :label="4" v-model="baseForm.agent_type">购买指定商品</el-radio>
+          </el-form-item>
+          <p style="font-size: 12px;color: #999;margin-left: 110px">人人分销”默认每个人都可以分销，“指定分销”仅可后台手动设置推广员，“满额分销”指用户购买商品满足消费金额后自动开启分销，“购买指定商品”指用户购买指定的商品后自动开启分销功能</p>
+          <el-form-item label="满额分销最低金额" v-if="baseForm.agent_type == 3" >
+            <el-input v-model="baseForm.agent_low_amount" style="width: 500px" type="number"></el-input>
+          </el-form-item>
+          <el-form-item label="指定商品" v-if="baseForm.agent_type == 4">
+            <el-button type="primary" icon="el-icon-plus" size="small" @click="selectGoods">选择商品</el-button>
+            <el-table
+                    :data="baseForm.buy_designated_goods"
+                    style="width: 1000px">
+              <el-table-column
+                      prop="id"
+                      label="ID">
+              </el-table-column>
+              <el-table-column
+                      prop="name"
+                      :show-overflow-tooltip="true"
+                      width="550px"
+                      label="商品名">
+              </el-table-column>
+              <el-table-column
+                      prop="price"
+                      label="价格">
+              </el-table-column>
+              <el-table-column
+                      fixed="right"
+                      label="操作">
+                <template slot-scope="scope">
+                  <el-button @click="handleDel(scope.$index)" type="text" size="small">删除</el-button>
+                </template>
+              </el-table-column>
+            </el-table>
+          </el-form-item>
+          <el-form-item>
+            <el-button type="primary" @click="saveBase">立即保存</el-button>
+          </el-form-item>
+        </el-form>
+      </el-tab-pane>
+      <el-tab-pane label="返佣设置" name="second">
+        <el-form ref="form" :model="backForm" label-width="100px">
+          <el-form-item label="自购分佣">
+            <el-radio :label="1" v-model="backForm.agent_self_buy">开启</el-radio>
+            <el-radio :label="2" v-model="backForm.agent_self_buy">关闭</el-radio>
+          </el-form-item>
+          <el-form-item label="自购返佣比例" v-if="backForm.agent_self_buy == 1">
+            <el-input v-model="backForm.self_buy_percent" style="width: 500px" type="number"></el-input>
+          </el-form-item>
+          <el-form-item label="返佣类型">
+            <el-radio :label="1" v-model="backForm.agent_give_back">按照商品价格返佣</el-radio>
+            <el-radio :label="2" v-model="backForm.agent_give_back">按照实际支付价格返佣</el-radio>
+          </el-form-item>
+          <el-form-item label="推广佣金单价">
+            <el-input v-model="backForm.agent_per_person" style="width: 500px" type="number"></el-input>
+          </el-form-item>
+          <p style="font-size: 12px;color: #999;margin-left: 110px">分销推广佣金单价（每推广一个用户）</p>
+          <!--<el-form-item label="单日返佣上限">
+            <el-input v-model="backForm.agent_give_back_limit" style="width: 500px" type="number"></el-input>
+          </el-form-item>-->
+          <el-form-item label="佣金冻结天数">
+            <el-input v-model="backForm.agent_money_freeze_day" style="width: 500px" type="number"></el-input>
+          </el-form-item>
+          <el-form-item label="上级分佣比例">
+            <el-input v-model="backForm.parent_percent" style="width: 500px" type="number"></el-input>
+          </el-form-item>
+          <p style="font-size: 12px;color: #999;margin-left: 110px">例如：10%，填写 0.1</p>
+          <el-form-item>
+            <el-button type="primary" @click="saveBack">立即保存</el-button>
+          </el-form-item>
+        </el-form>
+      </el-tab-pane>
+      <el-tab-pane label="提现设置" name="third">
+          <el-form ref="form" :model="amountForm" label-width="100px">
+            <el-form-item label="最低提现金额">
+              <el-input v-model="amountForm.min_apply_amount" style="width: 500px" type="number"></el-input>
+            </el-form-item>
+            <el-form-item label="提现方式">
+              <el-checkbox-group
+                      v-model="amountForm.apply_way">
+                <el-checkbox v-for="val in ways" :label="val" :key="val">{{val}}</el-checkbox>
+              </el-checkbox-group>
+            </el-form-item>
+            <el-form-item>
+              <el-button type="primary" @click="saveAmount">立即保存</el-button>
+            </el-form-item>
+          </el-form>
+      </el-tab-pane>
+    </el-tabs>
+
+    <el-dialog
+            class="goods-select"
+            title=""
+            :visible.sync="goodsDialogVisible"
+            width="70%">
+      <goods-select @selected-goods="handleSelectedGoods" @close-dialog="goodsDialogVisible=false"></goods-select>
+    </el-dialog>
+  </el-card>
+</div>
+
+<script>
+  new Vue({
+    el: '#app',
+    data: function () {
+      return {
+        pageLoading: true,
+        activeName: 'first',
+        goodsDialogVisible: false,
+        selectedGoods: [],
+        baseForm: {
+          agent_open: 1,
+          agent_type: 1,
+          agent_low_amount: 1000,
+          buy_designated_goods: []
+        },
+        backForm: {
+          agent_self_buy: 1,
+          agent_give_back: 1,
+          agent_per_person: 2,
+          agent_give_back_limit: 1000,
+          agent_money_freeze_day: 7,
+          parent_percent: 0.001,
+          self_buy_percent: 0.001
+        },
+        amountForm: {
+          min_apply_amount: 100,
+          apply_way: []
+        },
+        ways: ["微信", "支付宝", "银行卡"]
+      }
+    },
+    mounted() {
+      this.pageLoading = false
+      this.getAgentInfo()
+    },
+    methods: {
+      // 获取配置列表
+      async getAgentInfo() {
+        let res = await request.get("/addons/agent/admin.agent/setting")
+
+        this.baseForm.agent_type = parseInt(res.data.agent_type)
+        this.baseForm.agent_open = parseInt(res.data.agent_open)
+        this.baseForm.agent_low_amount = res.data.agent_low_amount
+        this.baseForm.buy_designated_goods = !res.data.buy_designated_goods ? [] : JSON.parse(res.data.buy_designated_goods)
+
+        this.backForm.agent_self_buy = parseInt(res.data.agent_self_buy)
+        this.backForm.agent_give_back = parseInt(res.data.agent_give_back)
+        this.backForm.agent_give_percent = res.data.agent_give_percent
+        this.backForm.agent_give_back_limit = res.data.agent_give_back_limit
+        this.backForm.agent_money_freeze_day = res.data.agent_money_freeze_day
+        this.backForm.parent_percent = res.data.parent_percent
+        this.backForm.self_buy_percent = res.data.self_buy_percent
+
+        this.amountForm.min_apply_amount = res.data.min_apply_amount
+        this.amountForm.apply_way = !res.data.apply_way ? [] : JSON.parse(res.data.apply_way)
+      },
+      // 保存基础配置
+      async saveBase() {
+        let form = this.baseForm
+        form.type = 1
+        let res = await request.post("/addons/agent/admin.agent/setting", form);
+        if (res.code == 0) {
+          this.$message.success(res.msg)
+        } else {
+          this.$message.error(res.msg)
+        }
+      },
+      // 返佣设置
+      async saveBack() {
+        let form = this.backForm
+        form.type = 2
+        let res = await request.post("/addons/agent/admin.agent/setting", form);
+        if (res.code == 0) {
+          this.$message.success(res.msg)
+        } else {
+          this.$message.error(res.msg)
+        }
+      },
+      // 提现设置
+      async saveAmount() {
+        let form = this.amountForm
+        form.type = 3
+        let res = await request.post("/addons/agent/admin.agent/setting", form);
+        if (res.code == 0) {
+          this.$message.success(res.msg)
+        } else {
+          this.$message.error(res.msg)
+        }
+      },
+      // 点击确定选择的商品
+      async handleSelectedGoods(goods) {
+        goods.forEach(item => {
+          if (this.selectedGoods.indexOf(item.id) == -1) {
+            this.selectedGoods.push(item.id)
+            this.baseForm.buy_designated_goods.push({
+              id: item.id,
+              name: item.name,
+              price: item.price
+            })
+          }
+        })
+        this.goodsDialogVisible = false
+      },
+      // 选择商品
+      selectGoods() {
+        this.goodsDialogVisible = true
+      },
+      // 删除关联商品
+      handleDel(index) {
+        this.selectedGoods.splice(index, 1)
+        this.baseForm.buy_designated_goods.splice(index, 1)
+      },
+      checked(val) {
+        console.log('选择', val)
+      }
+    }
+  });
+</script>
+<style>
+  .goods-select .el-dialog__header {
+    display: none;
+  }
+  .goods-select  .el-dialog__body {padding: 0;}
+  .goods-box {
+    margin-top: 10px;
+    border: 1px solid #ebebeb;
+    border-radius: 3px;
+    transition: .2s;
+    width: 1000px;
+    padding: 20px;
+  }
+</style>
+</body>
+</html>

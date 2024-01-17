@@ -1,0 +1,31 @@
+<el-table
+        :data="agentOrderTableData"
+        style="width: 100%;">
+    <el-table-column
+            prop="order_no"
+            label="订单ID">
+    </el-table-column>
+    <el-table-column
+            label="用户信息">
+        <template slot-scope="scope">
+            <span>昵称：{{ scope.row.agentUser.nickname }}</span><br/>
+            <span>手机号：{{ scope.row.agentUser.phone }}</span>
+        </template>
+    </el-table-column>
+    <el-table-column
+            prop="create_time"
+            label="时间">
+    </el-table-column>
+    <el-table-column
+            prop="spread_amount"
+            label="返佣金额">
+    </el-table-column>
+</el-table>
+<el-pagination
+        style="margin-top: 10px"
+        background
+        layout="->, prev, pager, next"
+        :page-size="agentUserForm.limit"
+        @current-change="handleAgentUserPageChange"
+        :total="agentUserTotal">
+</el-pagination>

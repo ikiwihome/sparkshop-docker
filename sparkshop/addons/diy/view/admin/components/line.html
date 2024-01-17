@@ -1,0 +1,105 @@
+<template id="c-line">
+    <div>
+        <div class="title-bar">{{ lineForm.title }}</div>
+        <el-form ref="form" :model="lineForm" label-width="80px" style="margin-top: 10px" label-position="left">
+            <el-form-item label="线条颜色">
+                <div style="float: right;text-align: center">
+                    <el-color-picker v-model="lineForm.lineColor" size="small"></el-color-picker>
+                </div>
+            </el-form-item>
+            <el-form-item label="线条样式">
+                <el-button-group style="float: right">
+                    <el-button size="mini" :class="{'primary': lineForm.lineType == 1}" @click="changeLine(1)">虚线
+                    </el-button>
+                    <el-button size="mini" :class="{'primary': lineForm.lineType == 2}" @click="changeLine(2)">实线
+                    </el-button>
+                    <el-button size="mini" :class="{'primary': lineForm.lineType == 3}" @click="changeLine(3)">点状线
+                    </el-button>
+                </el-button-group>
+            </el-form-item>
+            <el-form-item label="组件高度">
+                <el-slider
+                        v-model="lineForm.height"
+                        input-size="mini"
+                        show-input>
+                </el-slider>
+            </el-form-item>
+            <el-form-item label="左右边距">
+                <el-slider
+                        v-model="lineForm.margin"
+                        input-size="mini"
+                        show-input>
+                </el-slider>
+            </el-form-item>
+            <el-form-item label="页面边距">
+                <el-slider
+                        v-model="lineForm.padding"
+                        input-size="mini"
+                        show-input>
+                </el-slider>
+            </el-form-item>
+        </el-form>
+    </div>
+</template>
+
+<script>
+    Vue.component('cLine', {
+        template: '#c-line',
+        props: {
+            comData: {
+                type: Object
+            }
+        },
+        data() {
+            return {
+                lineForm: {
+                    type: 'cLine',
+                    title: '辅助线', // 标题
+                    lineColor: '#F5F5F5',
+                    lineType: 1, // 线条样式
+                    height: 1, // 组件高度
+                    margin: 0, // 左右边距
+                    padding: 0, // 页面边距
+                },
+            }
+        },
+        computed: {
+            componentData() {
+                return JSON.parse(JSON.stringify(this.lineForm));
+            },
+        },
+        watch: {
+            componentData: {
+                handler(newVal, oldVal) {
+                    if (!oldVal) {
+                        return false;
+                    }
+
+                    this.$emit('diy', {type: 'cLine', form: this.componentData, data: []})
+                },
+                deep: true
+            },
+            comData: {
+                handler(newVal) {
+                    this.lineForm = newVal
+                },
+                deep: true
+            }
+        },
+        created() {
+            if (this.comData) {
+                this.lineForm = this.comData
+            }
+        },
+        methods: {
+            // 改变形状
+            changeLine(type) {
+                this.lineForm.lineType = type
+            }
+        }
+    })
+</script>
+
+<style>
+
+</style>

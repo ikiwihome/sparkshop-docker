@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>分销商品</title>
+    <link rel="stylesheet" href="{__CSS__}/element_ui.css"/>
+    <link rel="stylesheet" href="{__CSS__}/style.css"/>
+    <script src="{__JS__}/vue2.js"></script>
+    <script src="{__JS__}/element_ui.js"></script>
+    <script src="{__JS__}/axios.min.js"></script>
+    <script src="{__JS__}/request.js"></script>
+</head>
+<body>
+{include file="../../../app/admin/view/default/components/goodsSelect"}
+<div id="app">
+    <div class="app-loading" v-if="pageLoading">
+        <div class="app-loading__logo">
+            <img src="{__IMG__}/logo.png"/>
+        </div>
+        <div class="app-loading__loader"></div>
+        <div class="app-loading__title">SparkShop</div>
+    </div>
+    <el-card class="box-card" v-else>
+        <div slot="header" class="clearfix">
+            <span>分销商品</span>
+        </div>
+        <div class="search-box">
+            <el-form :inline="true" :model="searchForm" class="demo-form-inline" style="margin-top: 20px;">
+                <el-form-item label="商品ID">
+                    <el-input v-model="searchForm.goods_id" placeholder="" clearable size="small"></el-input>
+                </el-form-item>
+                <el-form-item>
+                    <el-button type="primary" @click="onSubmit" size="small" icon="el-icon-search" >查询</el-button>
+                </el-form-item>
+            </el-form>
+        </div>
+        <div style="width:100%;height:0;border-bottom:#E4E7ED 1px dashed;margin-bottom: 15px"></div>
+        <el-button type="primary" icon="el-icon-plus" size="small" @click="addGoods" style="margin-top: 10px">添加商品</el-button>
+        <div style="width:100%;height:0;border-bottom:#E4E7ED 1px dashed;margin-top: 15px"></div>
+        <el-table
+                :data="tableData"
+                style="width: 100%;">
+            <el-table-column
+                    prop="goods.id"
+                    label="商品ID">
+            </el-table-column>
+            <el-table-column
+                    label="商品图">
+                <template slot-scope="scope">
+                    <el-image :src="JSON.parse(scope.row.goods.slider_image)[0]" style="width: 36px;height: 36px"></el-image>
+                </template>
+            </el-table-column>
+            <el-table-column
+                    prop="goods.name"
+                    label="商品名称">
+            </el-table-column>
+            <el-table-column
+                    prop="goods.stock"
+                    label="库存">
+            </el-table-column>
+            <el-table-column
+                    prop="goods.sales"
+                    label="销量">
+            </el-table-column>
+            <el-table-column
+                    prop="operation"
+                    label="操作">
+                <template slot-scope="scope">
+                    <el-button @click="handleDel(scope.row)" type="text" size="small">删除</el-button>
+                </template>
+            </el-table-column>
+        </el-table>
+        <el-pagination
+                style="margin-top: 10px"
+                background
+                layout="->, prev, pager, next"
+                :page-size="searchForm.limit"
+                @current-change="handlePageChange"
+                :total="total">
+        </el-pagination>
+
+        <el-dialog title="选择分销商品" :visible.sync="goodsDialogVisible" width="1000px" :close-on-click-modal="false">
+            <goods-select @selected-goods="handleSelectedGoods" @close-dialog="goodsDialogVisible=false"></goods-select>
+        </el-dialog>
+    </el-card>
+</div>
+
+<script>
+    new Vue({
+        el: '#app',
+        data: function () {
+            return {
+                pageLoading: true,
+                searchForm: {
+                    goods_id: '',
+                    limit: 15,
+                    page: 1
+                },
+                form: {
+                    goods_id: []
+                },
+                goodsDialogVisible: false,
+                total: 1,
+                tableData: [],
+                loading: false
+            }
+        },
+        mounted() {
+            this.getList()
+            this.pageLoading = false
+        },
+        methods: {
+            // 获取列表
+            async getList() {
+                let res = await request.get("/addons/agent/admin.agentGoods/index", this.searchForm)
+                this.tableData = res.data.data
+                this.total = res.data.total
+            },
+            // 添加分销商品
+            addGoods() {
+                this.goodsDialogVisible = true
+            },
+            // 搜索
+            onSubmit() {
+                this.searchForm.page = 1
+                this.getList()
+            },
+            // 删除参数
+            handleDel(item) {
+                this.$confirm('此操作将永久删除该分销商品, 是否继续?', '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning'
+                }).then(async () => {
+                    let res = await request.get("/addons/agent/admin.agentGoods/del", {id: item.id})
+                    if (res.code == 0) {
+                        this.$message.success(res.msg)
+                        this.getList()
+                    } else {
+                        this.$message.error(res.msg)
+                    }
+                }).catch(() => {});
+            },
+            // 分页
+            handlePageChange(page) {
+                this.searchForm.page = page
+                this.getList()
+            },
+            async handleSelectedGoods(val) {
+                let goodsIds = []
+                val.forEach(item => {
+                    goodsIds.push(item.id)
+                })
+                this.form.goods_id = goodsIds
+
+                let res = await request.post("/addons/agent/admin.agentGoods/add", this.form);
+                if (res.code == 0) {
+                    this.$message.success(res.msg)
+                    this.getList()
+                } else {
+                    this.$message.error(res.msg)
+                }
+
+                this.goodsDialogVisible = false
+            }
+        }
+    });
+</script>
+<style>
+    .el-table__header tr,
+    .el-table__header th {
+        padding: 0;
+        height: 20px;
+        line-height: 20px;
+    }
+    p { padding: 0;
+        margin: 0;}
+</style>
+</body>
+</html>

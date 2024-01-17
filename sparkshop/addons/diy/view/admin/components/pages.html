@@ -1,0 +1,539 @@
+<template id="pages">
+    <div class="pages-select">
+        <div class="pages-box">
+            <div class="menus">
+                <el-tree :data="pageMenu" node-key="id" :default-expanded-keys="[1, 4, 8, 10]"
+                         @node-click="checkMenu"></el-tree>
+            </div>
+            <div class="pages-content">
+                <div class="pages-item" v-for="item,index in showContent" :key="item.label" v-if="showType == 1">
+                    <div class="item-title">{{ item.label }}</div>
+                    <div class="item-box">
+                        <div class="item-box-btn" v-for="item2 in item.children" :key="item2.label" @click="selectLabel(item2)" :class="{'item-active': item2.path == nowPageUrl}">
+                            {{ item2.label }}
+                        </div>
+                    </div>
+                </div>
+                <!-- 商品分类 -->
+                <div v-if="showType == 2">
+                    <el-table
+                            :data="goodsCateList"
+                            @row-click="singleCateSelection"
+                            highlight-current-row
+                            style="width: 100%;"
+                            row-key="id"
+                            :tree-props="{children: 'child'}">
+                        <el-table-column width="55" label="选择" type="">
+                            <template #default="scope">
+                                <el-radio class="radio" v-model="cateSelectId" :label="scope.row.id">&nbsp;</el-radio>
+                            </template>
+                        </el-table-column>
+                        <el-table-column
+                                type=""
+                                prop="id"
+                                label="ID">
+                        </el-table-column>
+                        <el-table-column
+                                prop="name"
+                                label="分类名">
+                        </el-table-column>
+                        <el-table-column
+                                label="图标">
+                            <template slot-scope="scope">
+                                <el-image style="width: 30px; height: 30px" :src="scope.row.icon"></el-image>
+                            </template>
+                        </el-table-column>
+                    </el-table>
+                </div>
+                <!-- 商品信息 -->
+                <div v-if="showType == 3">
+                    <el-table
+                            ref="multipleTable"
+                            :data="goodsList"
+                            @row-click="handleSelectionGoods"
+                            :row-style="{ height: '57px'}"
+                            style="width: 100%;font-size: 12px">
+                        <el-table-column width="55" label="选择">
+                            <template #default="scope">
+                                <el-radio class="radio" v-model="goodsSelectId" :label="scope.row.id">&nbsp;</el-radio>
+                            </template>
+                        </el-table-column>
+                        <el-table-column
+                                prop="id"
+                                label="商品ID"
+                                width="75">
+                        </el-table-column>
+                        <el-table-column
+                                label="商品图"
+                                width="100">
+                            <template slot-scope="scope">
+                                <img :src="scope.row.pic" width="36px" height="36px"/>
+                            </template>
+                        </el-table-column>
+                        <el-table-column
+                                prop="name"
+                                label="商品名称">
+                        </el-table-column>
+                    </el-table>
+                    <div class="page-div" style="margin-top: 20px">
+                        <el-pagination
+                                background
+                                layout="prev, pager, next"
+                                :page-size="goodsListPage.limit"
+                                @current-change="goodsPageChange"
+                                :total="goodsListTotal">
+                        </el-pagination>
+                    </div>
+                </div>
+                <!-- 秒杀商品 -->
+                <div v-if="showType == 4">
+                    <el-table
+                            ref="multipleTable"
+                            :data="seckillGoodsList"
+                            @row-click="handleSelectionSeckillGoods"
+                            :row-style="{ height: '57px'}"
+                            style="width: 100%;font-size: 12px">
+                        <el-table-column width="55" label="选择">
+                            <template #default="scope">
+                                <el-radio class="radio" v-model="seckillGoodsSelectId" :label="scope.row.id">&nbsp;</el-radio>
+                            </template>
+                        </el-table-column>
+                        <el-table-column
+                                prop="id"
+                                label="商品ID"
+                                width="75">
+                        </el-table-column>
+                        <el-table-column
+                                label="商品图"
+                                width="100">
+                            <template slot-scope="scope">
+                                <img :src="scope.row.pic" width="36px" height="36px"/>
+                            </template>
+                        </el-table-column>
+                        <el-table-column
+                                prop="name"
+                                label="商品名称">
+                        </el-table-column>
+                    </el-table>
+                    <div class="page-div" style="margin-top: 20px">
+                        <el-pagination
+                                background
+                                layout="prev, pager, next"
+                                :page-size="seckillGoodsListPage.limit"
+                                @current-change="seckillGoodsPageChange"
+                                :total="seckillGoodsListTotal">
+                        </el-pagination>
+                    </div>
+                </div>
+                <!-- 文章列表 -->
+                <div v-if="showType == 5">
+                    <el-table
+                            :data="articleList"
+                            @row-click="handleSelectionArticle"
+                            style="width: 100%;">
+                        <el-table-column width="55" label="选择">
+                            <template #default="scope">
+                                <el-radio class="radio" v-model="articleSelectId" :label="scope.row.id">&nbsp;</el-radio>
+                            </template>
+                        </el-table-column>
+                        <el-table-column
+                                type=""
+                                prop="id"
+                                label="ID">
+                        </el-table-column>
+                        <el-table-column
+                                prop="title"
+                                label="文章标题">
+                        </el-table-column>
+                        <el-table-column
+                                prop="cateInfo.name"
+                                label="所属分类">
+                        </el-table-column>
+                    </el-table>
+                    <el-pagination
+                            style="margin-top: 10px"
+                            background
+                            layout="->, prev, pager, next"
+                            :page-size="articlePage.limit"
+                            @current-change="articlePageChange"
+                            :total="articleListTotal">
+                    </el-pagination>
+                </div>
+                <!-- 自定义链接 -->
+                <div v-if="showType == 6" class="diy-form">
+                    <el-form ref="form" :model="form" label-width="80px">
+                        <el-form-item label="跳转路径">
+                            <el-input v-model="form.diyUrl"></el-input>
+                        </el-form-item>
+                    </el-form>
+                </div>
+            </div>
+        </div>
+        <div style="width: 100%;border-top:1px solid #e2e2e2">
+            <el-button type="primary" size="small" style="float: right;margin-top: 10px" @click="toUse">确定</el-button>
+        </div>
+    </div>
+</template>
+
+<script>
+    Vue.component('pages', {
+        template: '#pages',
+        data() {
+            return {
+                pageMenu: [
+                    {
+                        id: 1,
+                        label: '商城页面',
+                        children: [
+                            {
+                                id: 2,
+                                label: '商城链接'
+                            },
+                            {
+                                id: 3,
+                                label: '营销链接'
+                            }
+                        ]
+                    },
+                    {
+                        id: 4,
+                        label: '商品页面',
+                        children: [
+                            {
+                                id: 5,
+                                label: '商品分类'
+                            },
+                            {
+                                id: 6,
+                                label: '商品'
+                            },
+                            {
+                                id: 7,
+                                label: '秒杀商品'
+                            }
+                        ]
+                    },
+                    {
+                        id: 8,
+                        label: '文章页面',
+                        children: [
+                            {
+                                id: 9,
+                                label: '文章'
+                            }
+                        ]
+                    },
+                    {
+                        id: 10,
+                        label: '自定义链接',
+                        children: [
+                            {
+                                id: 11,
+                                label: '自定义'
+                            }
+                        ]
+                    },
+                ],
+                showContent: {},
+                pageMenuContent: [
+                    {
+                        id: 2,
+                        children: [
+                            {
+                                label: '基础链接',
+                                children: [
+                                    {
+                                        'label': '商城首页',
+                                        'path': '/pages/index/index'
+                                    },
+                                    {
+                                        'label': '商城分类',
+                                        'path': '/pages/category/category'
+                                    },
+                                    {
+                                        'label': '购物车',
+                                        'path': '/pages/cart/cart'
+                                    },
+                                    {
+                                        'label': '个人中心',
+                                        'path': '/pages/user/user'
+                                    }
+                                ]
+                            },
+                            {
+                                label: '个人中心',
+                                children: [
+                                    {
+                                        'label': '我的余额',
+                                        'path': '/pages/mine/balance'
+                                    },
+                                    {
+                                        'label': '我的订单',
+                                        'path': '/pages/order/order?status=-1'
+                                    },
+                                    {
+                                        'label': '我的优惠券',
+                                        'path': '/pages/coupon/index'
+                                    },
+                                    {
+                                        'label': '我的地址',
+                                        'path': '/pages/address/address'
+                                    },
+                                    {
+                                        'label': '我的收藏',
+                                        'path': '/pages/user/collection'
+                                    },
+                                    {
+                                        'label': '设置',
+                                        'path': '/pages/set/set'
+                                    },
+                                    {
+                                        'label': '我的推广',
+                                        'path': '/pages/agent/index'
+                                    }
+                                ]
+                            },
+                        ]
+                    },
+                    {
+                        id: 3,
+                        children: [
+                            {
+                                label: '优惠券',
+                                children: [
+                                    {
+                                        'label': '我的优惠券',
+                                        'path': '/pages/coupon/index'
+                                    }
+                                ]
+                            },
+                            {
+                                label: '秒杀',
+                                children: [
+                                    {
+                                        'label': '秒杀列表',
+                                        'path': '/pages/seckill/index'
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ],
+                goodsCateList: [], // 商品分类
+                showType: 1,
+                cateSelectId: [],
+                goodsList: [],
+                goodsListPage: {
+                    page: 1,
+                    limit: 10,
+                    tab_type: 2,
+                    cate_id: 0,
+                    name: ''
+                },
+                goodsListTotal: 0,
+                goodsSelectId: 0,
+                seckillGoodsList: [],
+                seckillGoodsListPage: {
+                    page: 1,
+                    limit: 10
+                },
+                seckillGoodsListTotal: 0,
+                seckillGoodsSelectId: 0,
+                articleList: [],
+                articlePage: {
+                    page: 1,
+                    limit: 10,
+                    title: ''
+                },
+                articleListTotal: 0,
+                articleSelectId: 0,
+                baseIndex: '/{:config("shop.backend_index")}/',
+                form: {
+                    diyUrl: ''
+                },
+                nowPageUrl: '',
+                selectedData: {}
+            }
+        },
+        mounted() {
+            this.checkMenu({id: 2})
+        },
+        methods: {
+            // 选择菜单
+            async checkMenu(e) {
+                this.showContent = []
+
+                if (e.id == 2 || e.id == 3) {
+                    this.showType = 1
+                    this.pageMenuContent.forEach(item => {
+                        if (e.id == item.id) {
+                            this.showContent = item.children
+                            this.selectedData = {'type': 'page', 'data': item.path}
+                            return ;
+                        }
+                    })
+                }
+
+                // 商品分类
+                if (e.id == 5) {
+                    this.showType = 2
+                    let res = await request.get(this.baseIndex + 'goodsCate/index')
+                    this.goodsCateList = res.data
+                } else if (e.id == 6) { // 商品
+                    this.showType = 3
+                    this.getGoodsList()
+                } else if (e.id == 7) { // 秒杀商品
+                    this.showType = 4
+                    this.getSeckillGoodsList()
+                } else if (e.id == 9) { // 文章列表
+                    this.showType = 5
+                    this.getArticleList()
+                } else if (e.id == 11) { // 自定义链接
+                    this.showType = 6
+                }
+            },
+            // 单选分类
+            singleCateSelection(row) {
+                this.cateSelectId = row.id
+                this.selectedData = {'type': 'goodsCate', 'data': row.id}
+            },
+            // 获取商品数据
+            async getGoodsList() {
+                let res = await request.get(this.baseIndex + 'goods/index', this.goodsListPage)
+                this.goodsList = res.data.list.data
+                this.goodsList.map(item => {
+                    item.pic = JSON.parse(item.slider_image)[0]
+                    return item
+                })
+                this.goodsListTotal = res.data.list.total
+            },
+            // 商品页面改变
+            goodsPageChange(page) {
+                this.goodsListPage.page = page
+                this.getGoodsList()
+            },
+            // 单选商品
+            handleSelectionGoods(row) {
+                this.goodsSelectId = row.id
+                this.selectedData = {'type': 'goods', 'data': row.id}
+            },
+            // 获取秒杀商品
+            async getSeckillGoodsList() {
+                let res = await request.get('/addons/seckill/admin.seckill/index', this.seckillGoodsListPage)
+                this.seckillGoodsList = res.data.data
+                this.seckillGoodsListTotal = res.data.total
+            },
+            // 单选秒杀商品
+            handleSelectionSeckillGoods(row) {
+                this.seckillGoodsSelectId = row.id
+                this.selectedData = {'type': 'seckillGoods', 'data': row.id}
+            },
+            // 监听秒杀商品页面改变
+            seckillGoodsPageChange(page) {
+                this.seckillGoodsListPage.page = page
+                this.getSeckillGoodsList()
+            },
+            // 文章列表翻页
+            articlePageChange(page) {
+                this.articlePage.page = page
+                this.getArticleList()
+            },
+            // 获取文章列表
+            async getArticleList() {
+                let res = await request.get(this.baseIndex + 'article/index', this.articlePage)
+                this.articleList = res.data.data
+                this.articleListTotal = res.data.total
+            },
+            // 选择了文章
+            handleSelectionArticle(row) {
+                this.articleSelectId = row.id
+                this.selectedData = {'type': 'article', 'data': row.id}
+            },
+            // 选择数据
+            selectLabel(item) {
+                this.nowPageUrl = item.path
+                this.selectedData = {'type': 'page', 'data': item.path}
+            },
+            // 确定使用
+            toUse() {
+                if (this.showType == 6) {
+                    if (this.form.diyUrl == '') {
+                        this.$message.error('请输入自定义地址')
+                        return false;
+                    }
+                    this.selectedData = {'type': 'diy', 'data': this.form.diyUrl}
+                }
+
+                let data = this.selectedData
+                let page = ''
+                if (data.type == 'page' || data.type == 'diy') {
+                    page = data.data
+                } else if (data.type == 'goodsCate') {
+                    page = '/pages/product/list?id=' + data.data
+                } else if (data.type == 'goods') {
+                    page = '/pages/product/product?id=' + data.data
+                } else if (data.type == 'seckillGoods') {
+                    page = '/pages/seckill/product?id=' + data.data
+                } else if (data.type == 'article') {
+                    page = '/pages/article/detail?id=' + data.data
+                }
+
+                this.$emit('selected-page', {path: page})
+            }
+        }
+    })
+</script>
+<style>
+    .pages-select {
+        height: 530px;
+    }
+    .pages-box {
+        width: 1000px;
+        height: 500px;
+        display: flex;
+        overflow-y: scroll;
+    }
+    .pages-box .menus {
+        width: 200px;
+        height: 100%;
+        border-right: 1px solid #e2e2e2;
+    }
+    .pages-box .pages-content {
+        margin-left: 50px;
+        width: 700px;
+        height: 500px;
+    }
+    .item-title {
+        color: #000;
+        font-weight: 700;
+    }
+    .pages-item .item-box {
+        margin-top: 19px;
+        display: flex;
+        flex-wrap: wrap;
+    }
+    .item-box-btn {
+        font-weight: 400;
+        color: rgba(0,0,0,.85);
+        background: #fafafa;
+        border-radius: 3px;
+        text-align: center;
+        padding: 7px 30px;
+        margin-right: 10px;
+        margin-bottom: 18px;
+        cursor: pointer;
+    }
+    .item-box-btn:hover {
+        background: #e2e2e2;
+    }
+    .diy-form {
+        padding: 100px;
+    }
+    .diy-form .el-input input {
+        border-radius: 0px
+    }
+    .pages-item .item-active {
+        background: #409eff;
+        color: #fff;
+    }
+</style>

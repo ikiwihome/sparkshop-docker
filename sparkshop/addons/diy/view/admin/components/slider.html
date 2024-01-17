@@ -1,0 +1,151 @@
+<template id="c-slider">
+    <div>
+        <div class="title-bar">{{ sliderForm.title }}</div>
+        <el-tabs v-model="cTitleActive">
+            <el-tab-pane label="内容设置" name="first">
+                <p style="font-size: 12px;color:#999">建议宽度750px</p>
+                <el-form ref="form" :model="sliderForm" label-width="80px" label-position="right">
+                    <div v-for="item,index in sliderData" :key="index" class="notice-item slider-item">
+                        <div class="slider-img">
+                            <img :src="item.pic" v-if="item.pic != ''">
+                            <i class="el-icon-plus" v-else></i>
+                        </div>
+                        <div class="slider-link">
+                            <el-form-item label="链接">
+                                <div>
+                                    <el-input v-model="item.link" size="small" :readonly="true"></el-input>
+                                </div>
+                            </el-form-item>
+                        </div>
+                    </div>
+                </el-form>
+
+            </el-tab-pane>
+            <el-tab-pane label="样式设置" name="second">
+                <el-form ref="form" :model="sliderForm" label-width="90px" label-position="left">
+                    <el-form-item label="轮播图样式">
+                        <el-button-group style="float: right">
+                            <el-button size="mini" icon="iconfont icon-checkbox" :class="{'primary': sliderForm.sliderStyle == 'square'}" @click="changeStyle('square')"></el-button>
+                            <el-button size="mini" icon="iconfont icon-yuanjiao" :class="{'primary': sliderForm.sliderStyle == 'circle'}" @click="changeStyle('circle')"></el-button>
+                        </el-button-group>
+                    </el-form-item>
+                    <el-form-item label="左右边距">
+                        <el-slider
+                                v-model="sliderForm.borderMargin"
+                                input-size="mini"
+                                show-input>
+                        </el-slider>
+                    </el-form-item>
+                    <el-form-item label="页面间距">
+                        <el-slider
+                                v-model="sliderForm.pageMargin"
+                                input-size="mini"
+                                show-input>
+                        </el-slider>
+                    </el-form-item>
+                </el-form>
+            </el-tab-pane>
+        </el-tabs>
+    </div>
+</template>
+
+<script>
+    Vue.component('cSlider', {
+        template: '#c-slider',
+        props: {
+            comData: {
+                type: Object
+            }
+        },
+        data() {
+            return {
+                sliderForm: {
+                    title: '轮播图',
+                    type: 'cSlider',
+                    sliderStyle: 'square', // 轮播图样式
+                    borderMargin: 10, // 左右边距
+                    pageMargin: 2, // 页面间距
+                },
+                sliderData: [], // 幻灯图
+                cTitleActive: 'first',
+                dialogVisible: false,
+                dialogPageVisible: false,
+                nowIndex: 0
+            }
+        },
+        computed: {
+            componentData() {
+                return JSON.parse(JSON.stringify(this.sliderForm));
+            },
+        },
+        watch: {
+            componentData: {
+                handler(newVal, oldVal) {
+                    if (!oldVal) {
+                        return false;
+                    }
+
+                    this.$emit('diy', {type: 'cSlider', form: this.componentData, data: []})
+                },
+                deep: true
+            },
+            comData: {
+                handler(newVal) {
+                    this.sliderForm = newVal
+                },
+                deep: true
+            }
+        },
+        created() {
+            if (this.comData) {
+                this.sliderForm = this.comData
+            }
+        },
+        mounted() {
+            this.getSlider()
+        },
+        methods: {
+            // 删除幻灯
+            delSlider(index) {
+                this.sliderForm.content.splice(index, 1)
+            },
+            // 获取幻灯数据
+            async getSlider() {
+                let res = await request.get("/addons/diy/admin.api/getSlider", {position: 1})
+                this.sliderData = [];
+
+                res.data.forEach(item => {
+                    this.sliderData.push({
+                        title: item.name,
+                        link: item.target_url,
+                        pic: item.pic_url
+                    })
+                })
+            },
+            // 改变样式
+            changeStyle(type) {
+                this.sliderForm.sliderStyle = type
+            }
+        },
+    })
+</script>
+
+<style>
+    .slider-item {
+        display: flex;
+        position: relative;
+    }
+    .slider-img {
+        width: 60px;
+        height: 60px;
+        border: 1px solid #DCDFE6;
+        cursor: pointer;
+        line-height: 60px;
+        text-align: center;
+        color: #DCDFE6;
+    }
+    .slider-link {
+        width: calc(100% - 60px);
+        cursor: pointer;
+    }
+</style>

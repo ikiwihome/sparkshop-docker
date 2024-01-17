@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>插件后台</title>
+    <link rel="stylesheet" href="{__CSS__}/element_ui.css"/>
+    <link rel="stylesheet" href="{__CSS__}/style.css"/>
+    <link rel="stylesheet" href="{__CSS__}/diy.css"/>
+    <link rel="stylesheet" href="{__CSS__}/alifont/iconfont.css"/>
+    <link rel="stylesheet" href="{__CSS__}/diyalifont/iconfont.css"/>
+    <script src="{__JS__}/vue2.js"></script>
+    <script src="{__JS__}/element_ui.js"></script>
+    <script src="{__JS__}/axios.min.js"></script>
+    <script src="{__JS__}/request.js"></script>
+</head>
+<body style="margin: 0;padding: 0">
+<div id="app">
+    <div class="app-loading" v-if="pageLoading">
+        <div class="app-loading__logo">
+            <img src="{__IMG__}/logo.png"/>
+        </div>
+        <div class="app-loading__loader"></div>
+        <div class="app-loading__title">SparkShop</div>
+    </div>
+    <div class="box-card" v-else>
+        <div class="context">
+            <div class="diy-header" style="cursor: pointer;margin-top: 0px">
+                <span class="shop-title">{{ baseConfig.pageTitle }}</span>
+            </div>
+            <div class="diy-body-box" ref="scrollDiv">
+                <div class="diy-body" :style="bgStyle">
+                    <div style="width: 100%;padding: 10px" class="diy-search">
+                        <el-input
+                                placeholder="请输入内容 如：iphone"
+                                prefix-icon="el-icon-search">
+                        </el-input>
+                    </div>
+                    <div class="diy-item" v-for="item,index in diyData" :key="index">
+                        <!-- 商品列表 -->
+                        <div class="component-item" v-if="item.type == 'goods'"
+                             :class="{'component-on': (nowComponentIndex == index)}">
+                            <div class="goods-list"
+                                 :style="{'background': item.bgColor, 'padding-left': item.bgMargin + 'px', 'padding-right': item.bgMargin + 'px'}">
+                                <div :class="[item.lineNum == 1 ? 'goods-item1' : item.lineNum == 2 ? 'goods-item2' : 'goods-item3']"
+                                     v-for="item2 in goodsList" :key="item2.id"
+                                     :style="{'border-radius' : item.bgStyle == 'circle' ? '10px' : ''}">
+                                    <div class="goods-img">
+                                        <img :src="item2.slider_image"/>
+                                    </div>
+                                    <div class="goods-info">
+                                        <div class="goods-title" v-if="item.show_title == 1">
+                                            {{ item2.name }}
+                                        </div>
+                                        <div class="old-price" v-if="item.show_origin_price == 1">￥ {{
+                                            item2.original_price }}
+                                        </div>
+                                        <div class="goods-price" v-if="item.show_price == 1"
+                                             :style="{'color': item.priceColor}">￥ {{ item2.price }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- 商品分类 -->
+                        <div class="component-item" v-if="item.type == 'cate'"
+                             :class="{'component-on': (nowComponentIndex == index)}">
+                            <div :style="goodsCateStyle(item)" class="goods-cate-box">
+                                <div class="goods-cate">
+                                    <div class="item" v-for="item2,index2 in goodsCate" :key="item2.id"
+                                         :class="{'on': index2 == 0}" :style="{'color': item.fontColor}">{{
+                                        item2.name }}<span></span></div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- 公告 -->
+                        <div class="component-item" v-if="item.type == 'notice'"
+                             :class="{'component-on': (nowComponentIndex == index)}">
+                            <div class="notice-diy"
+                                 :style="{'background': item.bgColor, 'border-radius': item.bgStyle == 'circle' ? '6px' : '0px', 'margin-top': item.pageMargin + 'px', 'padding-left': item.bgMargin + 'px', 'padding-right': item.bgMargin + 'px'}">
+                                <div class="notice-img">
+                                    <img :src="item.icon" width="90px" height="30px"/>
+                                </div>
+                                <div class="notice-content"
+                                     :style="{'color': item.fontColor, 'font-size': item.fontSize + 'px', 'text-align': item.textAlign}">
+                                    {{ item.content[0] && item.content[0].title}}
+                                </div>
+                            </div>
+                        </div>
+                        <!-- 标题 -->
+                        <div class="component-item" v-if="item.type == 'cTitle'"
+                             :class="{'component-on': (nowComponentIndex == index)}">
+                            <div class="title-diy"
+                                 :style="{'background': item.bgColor, 'border-radius': item.bgStyle == 'circle' ? '6px' : '0px', 'margin-top': item.pageMargin + 'px', 'padding-left': item.bgMargin + 'px', 'padding-right': item.bgMargin + 'px'}">
+                                <div class="title-content"
+                                     :style="{'color': item.fontColor, 'font-size': item.fontSize + 'px', 'text-align': item.textAlign}">
+                                    {{ item.content }}
+                                </div>
+                            </div>
+                        </div>
+                        <!-- 辅助空白 -->
+                        <div class="component-item" v-if="item.type == 'blank'"
+                             :class="{'component-on': (nowComponentIndex == index)}">
+                            <div class="blank-diy"
+                                 :style="{'background': item.bgColor, 'height': item.height + 'px'}"></div>
+                        </div>
+                        <!-- 辅助线 -->
+                        <div class="component-item" v-if="item.type == 'cLine'"
+                             :class="{'component-on': (nowComponentIndex == index)}">
+                            <div class="line-box">
+                                <div class="box" :style="getLineStyle(item)"></div>
+                            </div>
+                        </div>
+                        <!-- 新闻列表 -->
+                        <div class="component-item" v-if="item.type == 'news'"
+                             :class="{'component-on': (nowComponentIndex == index)}">
+                            <div :style="{'padding-left': item.bgMargin + 'px', 'padding-right': item.bgMargin + 'px'}"
+                                 style="width: 100%">
+                                <div class="list-wrapper" :style="{'background': item.bgColor}">
+                                    <div class="item" :class="{'on': item.textAlign == 'left'}"
+                                         v-for="item2 in articleData" :key="item2.id"
+                                         :style="{'border-radius': item.bgStyle == 'circle' ? '10px' : '0px'}">
+                                        <div class="empty-img-box">
+                                            <i class="el-icon-picture"></i>
+                                        </div>
+                                        <div class="info">
+                                            <div class="title line2">{{ item2.title }}</div>
+                                            <div class="time">{{ item2.create_time }}</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- 导航 -->
+                        <div class="component-item" v-if="item.type == 'cSlider'"
+                             :class="{'component-on': (nowComponentIndex == index)}">
+                            <div class="slider-box"
+                                 :style="{'padding-left': item.borderMargin + 'px', 'padding-right': item.borderMargin + 'px', 'margin-top': item.pageMargin + 'px'}">
+                                <img :src="item.content[0].pic" v-if="item.content[0].pic"
+                                     :style="{'border-radius': item.sliderStyle == 'circle' ? '6px' : '0px'}">
+                                <div class="empty-img-box" v-else>
+                                    <i class="el-icon-picture"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- 导航组 -->
+                        <div class="component-item" v-if="item.type == 'sliderGroup'"
+                             :class="{'component-on': (nowComponentIndex == index)}">
+                            <div class="diy-menu-box"
+                                 :style="{'padding-left': item.borderMargin + 'px', 'padding-right': item.borderMargin + 'px', 'margin-top': item.pageMargin + 'px'}">
+                                <div class="menu-list" :style="{'background': item.bgColor}">
+                                    <div class="menu-item"
+                                         :class="{'four' : item.num == 4, 'five': item.num == 5}"
+                                         v-for="item2,index in item.content">
+                                        <div class="img-box">
+                                            <i :class="item2.icon"
+                                               :style="{'font-size': item.iconSize + 'px', 'color': item.iconColor}"></i>
+                                        </div>
+                                        <p style="color: rgb(51, 51, 51);"
+                                           :style="{'font-size': item.fontSize + 'px'}">{{ item2.title }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- 图片魔方 -->
+                        <div class="component-item" v-if="item.type == 'picMagic'"
+                             :class="{'component-on': (nowComponentIndex == index)}">
+                            <div class="magic-box">
+                                <div class="diy-style-1" v-if="item.style == 1"
+                                     :style="{'background': item.bgColor, 'border-radius': (item.bgStyle == 'circle') ? '12px' : '0px', 'margin-left': item.bgMargin + 'px', 'margin-right': item.bgMargin + 'px', 'margin-top': item.pageMargin + 'px'}">
+                                    <div class="item-box"
+                                         :style="{'margin-left': item.bgMargin + 'px', 'margin-right': item.bgMargin + 'px'}">
+                                        <div class="empty-img-box" v-if="!item.images[0]">
+                                            <i class="el-icon-picture"></i>
+                                        </div>
+                                        <img :src="item.images[0].url" v-else>
+                                    </div>
+                                </div>
+                                <div class="diy-style-2" v-if="item.style == 2"
+                                     :style="{'background': item.bgColor, 'border-radius': (item.bgStyle == 'circle') ? '12px' : '0px', 'margin-top': item.pageMargin + 'px'}">
+                                    <div class="item-box"
+                                         :style="{'margin-left': item.bgMargin + 'px', 'margin-right': item.bgMargin + 'px'}">
+                                        <div class="style-2-item">
+                                            <div class="empty-img-box" v-if="!item.images[0]">
+                                                <i class="el-icon-picture"></i>
+                                            </div>
+                                            <img :src="item.images[0].url" v-else>
+                                        </div>
+                                        <div class="style-2-item">
+                                            <div class="empty-img-box" v-if="!item.images[1]">
+                                                <i class="el-icon-picture"></i>
+                                            </div>
+                                            <img :src="item.images[1].url" v-else>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="diy-style-3" v-if="item.style == 3"
+                                     :style="{'background': item.bgColor, 'border-radius': (item.bgStyle == 'circle') ? '12px' : '0px', 'margin-top': item.pageMargin + 'px'}">
+                                    <div class="item-box"
+                                         :style="{'margin-left': item.bgMargin + 'px', 'margin-right': item.bgMargin + 'px'}">
+                                        <div class="style-3-item">
+                                            <div class="empty-img-box" v-if="!item.images[0]">
+                                                <i class="el-icon-picture"></i>
+                                            </div>
+                                            <img :src="item.images[0].url" v-else>
+                                        </div>
+                                        <div class="style-3-item">
+                                            <div class="empty-img-box" v-if="!item.images[1]">
+                                                <i class="el-icon-picture"></i>
+                                            </div>
+                                            <img :src="item.images[1].url" v-else>
+                                        </div>
+                                        <div class="style-3-item">
+                                            <div class="empty-img-box" v-if="!item.images[2]">
+                                                <i class="el-icon-picture"></i>
+                                            </div>
+                                            <img :src="item.images[2].url" v-else>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="diy-style-4" v-if="item.style == 4"
+                                     :style="{'background': item.bgColor, 'border-radius': (item.bgStyle == 'circle') ? '12px' : '0px', 'margin-top': item.pageMargin + 'px'}">
+                                    <div class="item-box"
+                                         :style="{'margin-left': item.bgMargin + 'px', 'margin-right': item.bgMargin + 'px'}">
+                                        <div class="style-left" style="border-right:none">
+                                            <div class="empty-img-box" v-if="!item.images[0]">
+                                                <i class="el-icon-picture"></i>
+                                            </div>
+                                            <img :src="item.images[0].url" v-else>
+                                        </div>
+                                        <div class="style-right">
+                                            <div class="style-top" style="border-bottom:none">
+                                                <div class="empty-img-box" v-if="!item.images[1]">
+                                                    <i class="el-icon-picture"></i>
+                                                </div>
+                                                <img :src="item.images[1].url" v-else>
+                                            </div>
+                                            <div class="style-down">
+                                                <div class="empty-img-box" v-if="!item.images[2]">
+                                                    <i class="el-icon-picture"></i>
+                                                </div>
+                                                <img :src="item.images[2].url" v-else>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="diy-style-5" v-if="item.style == 5"
+                                     :style="{'background': item.bgColor, 'border-radius': (item.bgStyle == 'circle') ? '12px' : '0px', 'margin-top': item.pageMargin + 'px'}">
+                                    <div class="item-box"
+                                         :style="{'margin-left': item.bgMargin + 'px', 'margin-right': item.bgMargin + 'px'}">
+                                        <div class="style-5-item">
+                                            <div class="empty-img-box" v-if="!item.images[0]">
+                                                <i class="el-icon-picture"></i>
+                                            </div>
+                                            <img :src="item.images[0].url" v-else>
+                                        </div>
+                                        <div class="style-5-item">
+                                            <div class="empty-img-box" v-if="!item.images[1]">
+                                                <i class="el-icon-picture"></i>
+                                            </div>
+                                            <img :src="item.images[1].url" v-else>
+                                        </div>
+                                        <div class="style-5-item">
+                                            <div class="empty-img-box" v-if="!item.images[2]">
+                                                <i class="el-icon-picture"></i>
+                                            </div>
+                                            <img :src="item.images[2].url" v-else>
+                                        </div>
+                                        <div class="style-5-item">
+                                            <div class="empty-img-box" v-if="!item.images[3]">
+                                                <i class="el-icon-picture"></i>
+                                            </div>
+                                            <img :src="item.images[3].url" v-else>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="diy-style-6" v-if="item.style == 6"
+                                     :style="{'background': item.bgColor, 'border-radius': (item.bgStyle == 'circle') ? '12px' : '0px', 'margin-top': item.pageMargin + 'px'}">
+                                    <div class="item-box"
+                                         :style="{'margin-left': item.bgMargin + 'px', 'margin-right': item.bgMargin + 'px'}">
+                                        <div class="style-left" style="border-right:none">
+                                            <div class="style-top" style="border-bottom:none">
+                                                <div class="empty-img-box" v-if="!item.images[0]">
+                                                    <i class="el-icon-picture"></i>
+                                                </div>
+                                                <img :src="item.images[0].url" v-else>
+                                            </div>
+                                            <div class="style-down">
+                                                <div class="empty-img-box" v-if="!item.images[1]">
+                                                    <i class="el-icon-picture"></i>
+                                                </div>
+                                                <img :src="item.images[1].url" v-else>
+                                            </div>
+                                        </div>
+                                        <div class="style-right">
+                                            <div class="style-top" style="border-bottom:none">
+                                                <div class="empty-img-box" v-if="!item.images[2]">
+                                                    <i class="el-icon-picture"></i>
+                                                </div>
+                                                <img :src="item.images[2].url" v-else>
+                                            </div>
+                                            <div class="style-down">
+                                                <div class="empty-img-box" v-if="!item.images[3]">
+                                                    <i class="el-icon-picture"></i>
+                                                </div>
+                                                <img :src="item.images[3].url" v-else>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- 优惠券 -->
+                        <div class="component-item" v-if="item.type == 'coupon'"
+                             :class="{'component-on': (nowComponentIndex == index)}">
+                            <div class="coupon-box"
+                                 :style="{'background': item.bgColor, 'border-radius': item.bgStyle == 'circle' ? '10px' : '0px', 'margin': '0px ' + item.bgMargin + 'px', 'margin-top': item.pageMargin + 'px'}">
+                                <div class="coupon-item">
+                                    <div class="left">
+                                        <div class="num">
+                                            <span>￥</span>50
+                                        </div>
+                                        <div class="txt">满100元可用</div>
+                                    </div>
+                                    <div class="right">立即领取</div>
+                                    <div class="roll up-roll" :style="{'background': item.bgColor}"></div>
+                                    <div class="roll down-roll" :style="{'background': item.bgColor}"></div>
+                                </div>
+                                <div class="coupon-item gray">
+                                    <div class="left">
+                                        <div class="num">
+                                            <span>￥</span>50
+                                        </div>
+                                        <div class="txt">满100元可用</div>
+                                    </div>
+                                    <div class="right">已领取</div>
+                                    <div class="roll up-roll" :style="{'background': item.bgColor}"></div>
+                                    <div class="roll down-roll" :style="{'background': item.bgColor}"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- 秒杀 -->
+                        <div class="component-item" v-if="item.type == 'seckill'"
+                             :class="{'component-on': (nowComponentIndex == index)}">
+                            <div class="seckill-div"
+                                 :style="{'background': item.bgColor, 'margin-top': item.pageMargin + 'px'}">
+                                <div class="seckill-box"
+                                     :style="{'border-radius': item.bgStyle == 'circle' ? '10px' : '0px', 'margin': '0px ' + item.bgMargin + 'px'}">
+                                    <div class="title">
+                                        <div class="left">
+                                            <img src="/static/admin/default/image/spike-icon-002.gif" alt="">
+                                            <p>限时秒杀</p>
+                                            <div class="time">
+                                                <span style="background: rgba(252, 60, 62, 0.09); color: rgb(233, 51, 35);">00</span><em>:</em>
+                                                <span style="background: rgba(252, 60, 62, 0.09); color: rgb(233, 51, 35);">00</span><em>:</em>
+                                                <span style="background: rgba(252, 60, 62, 0.09); color: rgb(233, 51, 35);">00</span>
+                                            </div>
+                                        </div>
+                                        <div class="right">更多</div>
+                                    </div>
+                                    <div class="seckill-list">
+                                        <div class="seckill-item">
+                                            <div class="img-box">
+                                                <div class="empty-img-box">
+                                                    <i class="el-icon-picture"></i>
+                                                </div>
+                                            </div>
+                                            <div class="seckill-title"
+                                                 :style="{'font-size': item.fontSize + 'px', 'color': item.fontColor}"
+                                                 v-if="item.show_title == 1">小米家用电饭煲小米家用电饭煲
+                                            </div>
+                                            <div class="price" v-if="item.show_price == 1">
+                                                        <span class="label"
+                                                              style="background: rgb(233, 51, 35);">抢</span>
+                                                <span class="num-label"
+                                                      style="color: rgb(233, 51, 35);">￥</span>
+                                                <span class="num" style="color: rgb(233, 51, 35);">234</span>
+                                            </div>
+                                        </div>
+
+                                        <div class="seckill-item">
+                                            <div class="img-box">
+                                                <div class="empty-img-box">
+                                                    <i class="el-icon-picture"></i>
+                                                </div>
+                                            </div>
+                                            <div class="seckill-title"
+                                                 :style="{'font-size': item.fontSize + 'px', 'color': item.fontColor}"
+                                                 v-if="item.show_title == 1">小米家用电饭煲小米家用电饭煲
+                                            </div>
+                                            <div class="price" v-if="item.show_price == 1">
+                                                        <span class="label"
+                                                              style="background: rgb(233, 51, 35);">抢</span>
+                                                <span class="num-label"
+                                                      style="color: rgb(233, 51, 35);">￥</span>
+                                                <span class="num" style="color: rgb(233, 51, 35);">234</span>
+                                            </div>
+                                        </div>
+
+                                        <div class="seckill-item">
+                                            <div class="img-box">
+                                                <div class="empty-img-box">
+                                                    <i class="el-icon-picture"></i>
+                                                </div>
+                                            </div>
+                                            <div class="seckill-title"
+                                                 :style="{'font-size': item.fontSize + 'px', 'color': item.fontColor}"
+                                                 v-if="item.show_title == 1">小米家用电饭煲小米家用电饭煲
+                                            </div>
+                                            <div class="price" v-if="item.show_price == 1">
+                                                        <span class="label"
+                                                              style="background: rgb(233, 51, 35);">抢</span>
+                                                <span class="num-label"
+                                                      style="color: rgb(233, 51, 35);">￥</span>
+                                                <span class="num" style="color: rgb(233, 51, 35);">234</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- 组件统一引入 -->
+{include file="/admin/components/index"}
+
+<script>
+    new Vue({
+        el: '#app',
+        data: function () {
+            return {
+                menuActive: 'first',
+                pageLoading: true,
+                activeName: ['1', '2'],
+                comName: 'home', // 激活的组件
+                // 使用的组件样式数组
+                diyData: [],
+                // 基础设置
+                baseConfig: {
+                    type: 'home',
+                    title: '页面设置', // 标题
+                    pageTitle: '商城首页',
+                    bgType: 1, // 背景设置
+                    bgColor: '#fff',
+                    bgStyle: 1,
+                },
+                bgStyle: '', // 背景图
+                nowComponentIndex: -1, // 当前组件的下标
+                baseIndex: '/{:config("shop.backend_index")}/',
+                goodsList: [],
+                goodsCate: [],
+                articleData: [],
+                comData: null, // 组件信息
+            }
+        },
+        mounted() {
+            this.pageLoading = false
+
+            this.getDiyInfo()
+        },
+        methods: {
+            // 获取基础数据
+            async getDiyInfo() {
+                let res = await request.get("/addons/diy/admin.diy/edit")
+                if (res.data) {
+                    this.diyData = JSON.parse(res.data.miniapp_home_diy)
+                    // 处理几个特殊的
+                    this.diyData.forEach(item => {
+                        if (item.type == 'goods') {
+                            this.getGoodList(item)
+                        } else if (item.type == 'cate') {
+                            this.getGoodsCate()
+                        } else if (item.type == 'news') {
+                            this.getArticleList(item)
+                        }
+                    })
+
+                    this.handleHome(JSON.parse(res.data.miniapp_home_bg_diy))
+                }
+            },
+            // 获取商品数据
+            async getGoodList(row) {
+                let res = await request.get("/addons/diy/admin.api/getGoodsList", {
+                    num: row.num,
+                    cate_id: row.cate_id,
+                    sortType: row.sortType
+                });
+                this.goodsList = res.data
+            },
+            // 获取商品分类
+            async getGoodsCate() {
+                let res = await request.get("/addons/diy/admin.api/getGoodsCate")
+                this.goodsCate = res.data
+            },
+            // 获取文章信息
+            async getArticleList(row) {
+                let res = await request.get("/addons/diy/admin.api/getArticle", {limit: row.num, cate_id: row.cate_id})
+                this.articleData = res.data
+            },
+            // 辅助线样式
+            getLineStyle(item) {
+                return {
+                    'border-bottom': item.height + 'px ' + ((item.lineType == 1) ? 'dashed ' : (item.lineType == 2) ? 'solid ' : 'dotted ') + item.lineColor,
+                    'margin-left': item.margin + 'px',
+                    'margin-right': item.margin + 'px',
+                    'margin-top': item.padding + 'px'
+                }
+            },
+            // 首页组件处理器
+            handleHome(data) {
+                if (data.bgType == 2) {
+                    this.bgStyle = 'background-image: url(' + data.bgImg + ');'
+                    if (data.bgStyle == 1) {
+                        this.bgStyle += 'background-size: 100%;background-repeat: no-repeat;'
+                    } else if (data.bgStyle == 2) {
+                        this.bgStyle += 'background-size: 100%;background-repeat: repeat;'
+                    } else {
+                        this.bgStyle += 'background-size: 100% 100%;background-repeat: no-repeat;'
+                    }
+                } else {
+                    this.bgStyle = 'background:' + data.bgColor;
+                }
+            },
+        }
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,91 @@
+<template id="coupon">
+    <div>
+        <div class="title-bar">{{ couponForm.title }}</div>
+        <el-form ref="form" :model="couponForm" label-width="80px" style="margin-top: 10px" label-position="left">
+            <el-form-item label="背景颜色">
+                <el-color-picker v-model="couponForm.bgColor" style="float: right" size="small"></el-color-picker>
+            </el-form-item>
+            <el-form-item label="主题颜色">
+                <el-color-picker v-model="couponForm.themeColor" style="float: right" size="small"></el-color-picker>
+            </el-form-item>
+            <el-form-item label="背景样式">
+                <el-button-group style="float: right">
+                    <el-button size="mini" icon="iconfont icon-checkbox" :class="{'primary': couponForm.bgStyle == 'square'}" @click="changeBg('square')"></el-button>
+                    <el-button size="mini" icon="iconfont icon-yuanjiao" :class="{'primary': couponForm.bgStyle == 'circle'}" @click="changeBg('circle')"></el-button>
+                </el-button-group>
+            </el-form-item>
+            <el-form-item label="背景边距">
+                <el-slider
+                        v-model="couponForm.bgMargin"
+                        input-size="mini"
+                        show-input>
+                </el-slider>
+            </el-form-item>
+            <el-form-item label="页面间距">
+                <el-slider
+                        v-model="couponForm.pageMargin"
+                        input-size="mini"
+                        show-input>
+                </el-slider>
+            </el-form-item>
+        </el-form>
+    </div>
+</template>
+
+<script>
+    Vue.component('coupon', {
+        template: '#coupon',
+        props: {
+            comData: {
+                type: Object
+            }
+        },
+        data() {
+            return {
+                couponForm: {
+                    type: 'coupon',
+                    title: '优惠券', // 标题
+                    bgColor: '#fff', // 背景颜色
+                    themeColor: '#e93323', // 主题颜色
+                    bgStyle: 'square', // 背景样式
+                    bgMargin: 0, // 背景边距
+                    pageMargin: 0 // 页面间距
+                }
+            }
+        },
+        computed: {
+            componentData() {
+                return JSON.parse(JSON.stringify(this.couponForm));
+            },
+        },
+        watch: {
+            componentData: {
+                handler(newVal, oldVal) {
+                    if (!oldVal) {
+                        return false;
+                    }
+
+                    this.$emit('diy', {type: 'coupon', form: this.componentData, data: []})
+                },
+                deep: true
+            },
+            comData: {
+                handler(newVal) {
+                    this.couponForm = newVal
+                },
+                deep: true
+            }
+        },
+        created() {
+            if (this.comData) {
+                this.couponForm = this.comData
+            }
+        },
+        methods: {
+            // 设置背景
+            changeBg(type) {
+                this.couponForm.bgStyle = type
+            }
+        }
+    })
+</script>

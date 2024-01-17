@@ -1,0 +1,208 @@
+<template id="c-goods">
+    <div>
+        <div class="title-bar">{{ goodsForm.title }}</div>
+        <el-tabs v-model="cTitleActive">
+            <el-tab-pane label="内容设置" name="first">
+                <el-form ref="form" :model="goodsForm" label-width="100px" label-position="left">
+                    <el-form-item label="商品分类">
+                        <el-select v-model="goodsForm.cate_id" placeholder="请选择" style="width: 100%" clearable>
+                            <el-option-group
+                                    v-for="group in cate"
+                                    :key="group.id"
+                                    :label="group.name">
+                                <el-option
+                                        v-for="item in group.child"
+                                        :key="item.id"
+                                        :label="item.name"
+                                        :value="item.id">
+                                </el-option>
+                            </el-option-group>
+                        </el-select>
+                    </el-form-item>
+                    <el-form-item label="商品排序">
+                        <span>综合</span>
+                        <el-button-group style="float: right">
+                            <el-button size="mini" icon="el-icon-s-operation" :class="{'primary': goodsForm.sortType == 'common'}" @click="sort('common')"></el-button>
+                            <el-button size="mini" icon="el-icon-s-data" :class="{'primary': goodsForm.sortType == 'sales'}" @click="sort('sales')"></el-button>
+                            <el-button size="mini" icon="el-icon-money" :class="{'primary': goodsForm.sortType == 'price'}" @click="sort('price')"></el-button>
+                        </el-button-group>
+                    </el-form-item>
+                    <el-form-item label="商品数量">
+                        <el-input v-model="goodsForm.num" type="number" size="small"></el-input>
+                    </el-form-item>
+                    <el-form-item label="是否显示名称">
+                        <el-switch
+                                style="float: right"
+                                :active-value="1"
+                                :inactive-value="2"
+                                v-model="goodsForm.show_title">
+                        </el-switch>
+                    </el-form-item>
+                    <el-form-item label="是否显示原价">
+                        <el-switch
+                                style="float: right"
+                                :active-value="1"
+                                :inactive-value="2"
+                                v-model="goodsForm.show_origin_price">
+                        </el-switch>
+                    </el-form-item>
+                    <el-form-item label="是否显示价格">
+                        <el-switch
+                                style="float: right"
+                                :active-value="1"
+                                :inactive-value="2"
+                                v-model="goodsForm.show_price">
+                        </el-switch>
+                    </el-form-item>
+                </el-form>
+            </el-tab-pane>
+            <el-tab-pane label="样式设置" name="second">
+                <el-form ref="form" :model="goodsForm" label-width="100px" label-position="left">
+                    <el-form-item label="背景颜色">
+                        <el-color-picker v-model="goodsForm.bgColor" style="float: right" size="small"></el-color-picker>
+                    </el-form-item>
+                    <el-form-item label="价格颜色">
+                        <el-color-picker v-model="goodsForm.priceColor" style="float: right" size="small"></el-color-picker>
+                    </el-form-item>
+                    <el-form-item label="显示类型">
+                        <span>一列</span>
+                        <el-button-group style="float: right">
+                            <el-button size="mini" icon="iconfont icon-yilie" :class="{'primary': goodsForm.lineNum == 1}" @click="changeLine(1)"></el-button>
+                            <el-button size="mini" icon="iconfont icon-lianglie" :class="{'primary': goodsForm.lineNum == 2}" @click="changeLine(2)"></el-button>
+                            <el-button size="mini" icon="iconfont icon-sanlie" :class="{'primary': goodsForm.lineNum == 3}" @click="changeLine(3)"></el-button>
+                        </el-button-group>
+                    </el-form-item>
+                    <el-form-item label="内容样式">
+                        <span>直角</span>
+                        <el-button-group style="float: right">
+                            <el-button size="mini" icon="iconfont icon-checkbox" :class="{'primary': goodsForm.bgStyle == 'square'}" @click="changeBgStyle('square')"></el-button>
+                            <el-button size="mini" icon="iconfont icon-yuanjiao" :class="{'primary': goodsForm.bgStyle == 'circle'}" @click="changeBgStyle('circle')"></el-button>
+                        </el-button-group>
+                    </el-form-item>
+                    <el-form-item label="背景边距">
+                        <el-slider
+                                @change="changeBgMargin"
+                                v-model="goodsForm.bgMargin"
+                                input-size="mini"
+                                show-input>
+                        </el-slider>
+                    </el-form-item>
+                </el-form>
+            </el-tab-pane>
+        </el-tabs>
+    </div>
+</template>
+
+<script>
+    Vue.component('goods', {
+        template: '#c-goods',
+        props: {
+            comData: {
+                type: Object
+            }
+        },
+        data() {
+            return {
+                goodsForm: {
+                    type: 'goods',
+                    title: '商品列表', // 标题
+                    cate_id: '', // 商品分类
+                    sortType: 'common', // 排序方式
+                    num: 6, // 商品数量
+                    show_title: 1, // 显示名称
+                    show_origin_price: 1, // 是否显示原价
+                    show_price: 1, // 显示价格
+                    lineNum: 1, // 显示类型
+                    bgColor: '#fff', // 背景颜色
+                    priceColor: '#e93323', // 价格颜色
+                    bgStyle: 'square', // 背景样式
+                    bgMargin: 10 // 背景边距
+                },
+                cTitleActive: 'first',
+                cate: [],
+                goodsList: []
+            }
+        },
+        computed: {
+            componentData() {
+                return JSON.parse(JSON.stringify(this.goodsForm));
+            },
+        },
+        watch: {
+            componentData: {
+                handler(newVal, oldVal) {
+                    if (!oldVal) {
+                        return false;
+                    }
+
+                    if (newVal.num <= 0 || !newVal.num) {
+                        this.$message.error('商品数量必须大于等于1')
+                        return false;
+                    }
+
+                    if (newVal.cate_id != oldVal.cate_id || newVal.num != oldVal.num) {
+                        this.getGoodsList()
+                    } else {
+                        this.$emit('diy', {type: 'goods', form: this.componentData, data: this.goodsList})
+                    }
+                },
+                deep: true
+            },
+            comData: {
+                handler(newVal) {
+                    this.goodsForm = newVal
+                },
+                deep: true
+            }
+        },
+        created() {
+            if (this.comData) {
+                this.goodsForm = this.comData
+            }
+        },
+        mounted() {
+            this.getGoodsCate()
+        },
+        methods: {
+            // 获取商品分类
+            async getGoodsCate() {
+                let res = await request.get("/addons/diy/admin.api/getGoodsCate")
+                this.cate = res.data
+
+                this.getGoodsList()
+            },
+            // 获取商品信息
+            async getGoodsList() {
+                let res = await request.get("/addons/diy/admin.api/getGoodsList", {
+                    num: this.goodsForm.num,
+                    cate_id: this.goodsForm.cate_id,
+                    sortType: this.goodsForm.sortType
+                });
+                this.goodsList = res.data
+
+                this.$emit('diy', {type: 'goods', form: this.goodsForm, data: res.data})
+            },
+            // 排序
+            sort(sortType) {
+                this.goodsForm.sortType = sortType
+                this.getGoodsList()
+            },
+            // 改变排列方式
+            changeLine(type) {
+                this.goodsForm.lineNum = type
+            },
+            // 改变背景样式
+            changeBgStyle(type) {
+                this.goodsForm.bgStyle = type
+            },
+            // 改变背景
+            changeBgMargin(val) {
+                this.goodsForm.bgMargin = val
+            }
+        }
+    })
+</script>
+
+<style>
+
+</style>

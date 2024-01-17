@@ -1,0 +1,266 @@
+.box-height {
+    min-height: calc(100vh - 540px);
+    overflow: hidden;
+    margin-bottom: 50px;
+}
+
+.header-area, .footer-area, .copy-right-area {
+    background: #fff;
+}
+
+.goods_cate .nav {
+    width: 100%;
+    height: 50px;
+    cursor: pointer;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    background: #fff;
+}
+
+.goods_cate_list {
+    height: 50px;
+    width: 90%;
+    float: left;
+}
+
+.goods_cate_more {
+    height: 50px;
+    width: 10%;
+    float: left;
+}
+
+.goods_cate_item {
+    width: 10%;
+    float: left;
+    height: 50px;
+    line-height: 50px;
+    text-align: center;
+    cursor: pointer;
+}
+
+.goods_cate_item a {
+    color: #282828;
+}
+
+.goods_cate_more {
+    height: 50px;
+    line-height: 50px;
+    text-align: center;
+    color: #282828;
+}
+
+.goods_cate_item:hover {
+    color: #e93323;
+}
+
+.item_active {
+    color: #e93323 !important;
+}
+
+.goods_cate_detail {
+    width: 100%;
+    background: #fff;
+}
+
+.sub_cate {
+    width: 100%;
+    min-height: 65px;
+    overflow: hidden;
+}
+
+.cate_sort {
+    width: 100%;
+    min-height: 65px;
+}
+
+.sub_cate_title {
+    height: 65px;
+    color: #969696;
+    width: 103px;
+    padding-left: 27px;
+    padding-top: 15px;
+    float: left;
+}
+
+.sub_cate_content {
+    width: 90%;
+    float: left;
+    min-height: 65px;
+    border-bottom: 1px dotted #efefef;
+}
+
+.sort_menu {
+    width: 90%;
+    float: left;
+    min-height: 65px;
+}
+
+.goods_cate_content {
+    min-height: 300px;
+    width: 100%;
+    margin-left: 0;
+}
+
+.goods_cate_content .item:first-child {
+    margin-left: 0;
+}
+
+.goods_cate_content .item {
+    background-color: #fff;
+    padding: 16px;
+    width: 235px;
+    height: 340px;
+    cursor: pointer;
+    overflow: hidden;
+    margin-left: 30px;
+    margin-top: 20px;
+}
+
+.item .pictrue {
+    width: 192px;
+    height: 192px;
+}
+
+.item .money .font-color {
+    font-weight: 700;
+    font-size: 22px;
+}
+
+.font-color {
+    color: #e93323 !important;
+}
+
+.item .money .y_money {
+    font-size: 12px;
+    color: #aaa;
+    text-decoration: line-through;
+    margin-left: 8px;
+    cursor: pointer;
+}
+
+.item .name {
+    color: #5a5a5a;
+    margin-top: 8px;
+    height: 40px;
+}
+
+.line2 {
+    word-break: break-all;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.item .bottom {
+    font-size: 12px;
+    color: #aaa;
+    margin-top: 10px;
+}
+
+.seller_num {
+    width: 50%;
+    float: left
+}
+
+.score {
+    width: 50%;
+    float: left;
+    text-align: right
+}
+
+.pc-more-goods {
+    width: 60px;
+    margin-left: 45%;
+    margin-top: 20px;
+    cursor: pointer;
+    color: #5a5a5a;
+}
+
+.cate-crumbs:hover {
+    color: #e93323;
+}
+
+.get-more {
+    display: block;
+    padding: 5px;
+    width: 90px;
+    text-align: center;
+    background: #e2e2e2;
+}
+
+.sort-active {
+    color: #e93323;
+}
+.sort-active i {
+    color: #e93323 !important;
+}
+ul.am-dropdown-content {
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.175);
+    border: 1px solid #ededed;
+    padding: 0;
+    list-style: none;
+    position: absolute;
+    top: 100%;
+    left: 37px;
+    z-index: 1020;
+    display: none;
+    float: left;
+    min-width: 160px;
+    margin: 9px 0 0;
+    text-align: left;
+    line-height: 1.6;
+    background-color: #fff;
+    -webkit-background-clip: padding-box;
+    background-clip: padding-box;
+    -webkit-animation-duration: .15s;
+    animation-duration: .15s;
+}
+.am-dropdown-content li a {
+    text-decoration: none;
+    color: #666;
+    margin-top: 0;
+}
+ul.am-dropdown-content > li > a {
+    display: block;
+    padding: 6px 20px;
+    clear: both;
+    font-weight: normal;
+    color: #333333;
+    white-space: nowrap;
+}
+.goods-cate-menu {
+    cursor: pointer;
+}
+.goods-cate-menu a:hover {
+    color: #e93323;
+}
+.pagination {
+    display: flex;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+.pagination li {
+    display: inline-block;
+    margin-right: 10px;
+}
+.pagination li.active {
+    background-color: #e93323;
+    color: #fff;
+    padding: 5px 10px;
+}
+.pagination li a.prev,
+.pagination li a.next {
+    background-color: #d9d9d9;
+    color: #333;
+    border-color: #ccc;
+}
+.pagination li a {
+    display: inline-block;
+    padding: 5px 10px;
+    color: #333;
+    text-decoration: none;
+}
+.pagination li span.delimiter {
+    color: #999;
+}

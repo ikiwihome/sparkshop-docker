@@ -1,0 +1,72 @@
+<template id="c-blank">
+    <div>
+        <div class="title-bar">{{ blankForm.title }}</div>
+        <el-form ref="form" :model="blankForm" label-width="80px" style="margin-top: 10px" label-position="left">
+            <el-form-item label="背景颜色">
+                <div style="float: right;text-align: center">
+                    <el-color-picker v-model="blankForm.bgColor" size="small"></el-color-picker>
+                </div>
+            </el-form-item>
+            <el-form-item label="组件高度">
+                <el-slider
+                        v-model="blankForm.height"
+                        input-size="mini"
+                        show-input>
+                </el-slider>
+            </el-form-item>
+        </el-form>
+    </div>
+</template>
+
+<script>
+    Vue.component('blank', {
+        template: '#c-blank',
+        props: {
+            comData: {
+                type: Object
+            }
+        },
+        data() {
+            return {
+                blankForm: {
+                    type: 'blank',
+                    title: '辅助空白', // 标题
+                    bgColor: '#fff',
+                    height: 10 // 组件高度
+                },
+            }
+        },
+        computed: {
+            componentData() {
+                return JSON.parse(JSON.stringify(this.blankForm));
+            },
+        },
+        watch: {
+            componentData: {
+                handler(newVal, oldVal) {
+                    if (!oldVal) {
+                        return false;
+                    }
+
+                    this.$emit('diy', {type: 'blank', form: this.componentData, data: []})
+                },
+                deep: true
+            },
+            comData: {
+                handler(newVal) {
+                    this.blankForm = newVal
+                },
+                deep: true
+            }
+        },
+        created() {
+            if (this.comData) {
+                this.blankForm = this.comData
+            }
+        },
+    })
+</script>
+
+<style>
+
+</style>

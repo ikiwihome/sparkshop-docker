@@ -1,0 +1,133 @@
+{include file="../../../app/admin/view/default/components/fileSelect"}
+{include file="/admin/components/pages"}
+<template id="c-home">
+    <div>
+        <div class="title-bar">{{ homeForm.title }}</div>
+        <el-form ref="form" :model="homeForm" label-width="100px" style="margin-top: 10px" label-position="left">
+            <el-form-item label="页面标题">
+                <el-input v-model="homeForm.pageTitle" size="small"></el-input>
+            </el-form-item>
+            <el-form-item label="背景设置">
+                <el-radio v-model="homeForm.bgType" :label="1">背景色</el-radio>
+                <el-radio v-model="homeForm.bgType" :label="2">背景图</el-radio>
+            </el-form-item>
+            <el-form-item label="背景颜色" v-if="homeForm.bgType == 1">
+                <div style="float: right;text-align: center">
+                    <el-color-picker v-model="homeForm.bgColor" size="small" style="margin-right: 10px"></el-color-picker>
+                </div>
+            </el-form-item>
+            <el-form-item label="背景图" v-if="homeForm.bgType == 2">
+                <div style="display: flex">
+                    <div class="img-pic" style="cursor: pointer" @click="dialogVisible = true">
+                        <i class="el-icon-plus"></i>
+                    </div>
+                    <div class="img-pic" v-if="homeForm.bgImg" style="margin-left: 10px;border: none">
+                        <img :src="homeForm.bgImg" style="width: 60px;height: 60px;"/>
+                    </div>
+                </div>
+            </el-form-item>
+            <el-form-item label="背景图样式" v-if="homeForm.bgType == 2">
+                <span>{{ bgType }}</span>
+                <el-button-group style="float: right">
+                    <el-button size="mini" icon="iconfont icon-checkbox"
+                               :class="{'primary': homeForm.bgStyle == 1}" @click="changeBg(1)"></el-button>
+                    <el-button size="mini" icon="iconfont icon-repeat"
+                               :class="{'primary': homeForm.bgStyle == 2}" @click="changeBg(2)"></el-button>
+                    <el-button size="mini" icon="iconfont icon-zhankai"
+                               :class="{'primary': homeForm.bgStyle == 3}" @click="changeBg(3)"></el-button>
+                </el-button-group>
+            </el-form-item>
+        </el-form>
+
+        <el-dialog title="" :visible.sync="dialogVisible" width="1200px" class="image-check-dialog">
+            <file-select :need-select="true" @selected-img="selectedImg" @close-dialog="dialogVisible=false" :select-num="1"></file-select>
+        </el-dialog>
+    </div>
+</template>
+
+<script>
+    Vue.component('home', {
+        template: '#c-home',
+        props: {
+            comData: {
+                type: Object
+            }
+        },
+        data() {
+            return {
+                dialogVisible: false,
+                dialogPageVisible: false,
+                homeForm: {
+                    type: 'home',
+                    title: '页面设置', // 标题
+                    pageTitle: '商城首页',
+                    bgType: 2, // 背景设置
+                    bgColor: '#fff',
+                    bgStyle: 1,
+                    bgImg: '/static/admin/default/image/home_bg.png'
+                },
+                bgType: '适配'
+            }
+        },
+        computed: {
+            componentData() {
+                return JSON.parse(JSON.stringify(this.homeForm));
+            },
+        },
+        watch: {
+            componentData: {
+                handler(newVal, oldVal) {
+                    if (!oldVal) {
+                        return false;
+                    }
+
+                    this.$emit('diy', {type: 'home', form: this.componentData, data: []})
+                },
+                immediate: true,
+                deep: true
+            },
+            comData: {
+                handler(newVal) {
+                    this.homeForm = newVal
+                },
+                deep: true
+            }
+        },
+        created() {
+            if (this.comData) {
+                this.homeForm = this.comData
+            }
+
+            this.$emit('diy', {type: 'home', form: this.componentData, data: []})
+        },
+        methods: {
+            selectedImg(file) {
+                this.homeForm.bgImg = file[0].url
+                this.dialogVisible = false
+            },
+            // 改变背景
+            changeBg(type) {
+                this.homeForm.bgStyle = type
+                if (type == 1) {
+                    this.bgType = '适配'
+                } else if (type == 2) {
+                    this.bgType = '平铺'
+                } else {
+                    this.bgType = '拉伸'
+                }
+            }
+        },
+    })
+</script>
+
+<style>
+.img-pic {
+    width: 60px;
+    height: 60px;
+    line-height: 60px;
+    text-align: center;
+    border: 1px solid #DCDFE6;
+}
+.image-check-dialog .el-dialog__header {display: none}
+.image-check-dialog .el-dialog__body {padding: 0;}
+</style>

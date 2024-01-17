@@ -1,0 +1,464 @@
+<template id="picMagic">
+    <div class="picMagic">
+        <div class="title-bar">{{ magicForm.title }}</div>
+        <el-form ref="form" :model="magicForm" label-width="80px" label-position="top">
+            <el-form-item label="选择样式">
+                <span style="margin-right: 10px">{{ styleName }}</span>
+                <el-button-group>
+                    <el-button size="mini" icon="iconfont icon-yilie" :type="buttonType(1)"  @click="ckStyle(1)"></el-button>
+                    <el-button size="mini" icon="iconfont icon-lianglie" :type="buttonType(2)" @click="ckStyle(2)"></el-button>
+                    <el-button size="mini" icon="iconfont icon-sanlie" :type="buttonType(3)" @click="ckStyle(3)"></el-button>
+                    <el-button size="mini" icon="iconfont icon-chanpinhunpai" :type="buttonType(4)" @click="ckStyle(4)"></el-button>
+                    <el-button size="mini" icon="iconfont icon-silie" :type="buttonType(5)" @click="ckStyle(5)"></el-button>
+                    <el-button size="mini" icon="iconfont icon-shuanglieliebiao" :type="buttonType(6)" @click="ckStyle(6)"></el-button>
+                </el-button-group>
+            </el-form-item>
+            <el-form-item label="布局">
+                <span style="font-size: 12px;color:rgba(0,0,0,.45);">选定布局区域，在下方添加图片，建议添加比例一致的图片</span>
+                <div class="style-1" v-if="magicForm.style == 1">
+                    <img :src="magicForm.images[0].url" v-if="magicForm.images[0]"/>
+                    <div v-else>尺寸不限</div>
+                </div>
+                <div class="style-2" v-if="magicForm.style == 2">
+                    <div class="style-2-item" @click="ckBoxStyle(2, 1)" :class="{'on': styleForm.styleBox2 == 1}">
+                        <div class="active-img" v-if="magicForm.images[0]">
+                            <img :src="magicForm.images[0].url"/>
+                        </div>
+                        <div class="notice" v-else>
+                            <div>宽375px</div>
+                            <div>高度不限</div>
+                        </div>
+                    </div>
+                    <div class="style-2-item" @click="ckBoxStyle(2, 2)" :class="{'on': styleForm.styleBox2 == 2}">
+                        <div class="active-img" v-if="magicForm.images[1]">
+                            <img :src="magicForm.images[1].url"/>
+                        </div>
+                        <div class="notice" v-else>
+                            <div>宽375px</div>
+                            <div>高度不限</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="style-2" v-if="magicForm.style == 3" style="height: 126px">
+                    <div class="style-2-item" @click="ckBoxStyle(3, 1)" :class="{'on': styleForm.styleBox3 == 1}" style="width: 33.3333%">
+                        <div class="active-img" v-if="magicForm.images[0]">
+                            <img :src="magicForm.images[0].url"/>
+                        </div>
+                        <div class="notice" v-else>
+                            <span>宽250px</span>
+                            <span>高度不限</span>
+                        </div>
+                    </div>
+                    <div class="style-2-item" @click="ckBoxStyle(3, 2)" :class="{'on': styleForm.styleBox3 == 2}" style="width: 33.3333%">
+                        <div class="active-img" v-if="magicForm.images[1]">
+                            <img :src="magicForm.images[1].url"/>
+                        </div>
+                        <div class="notice" v-else>
+                            <span>宽250px</span>
+                            <span>高度不限</span>
+                        </div>
+                    </div>
+                    <div class="style-2-item" @click="ckBoxStyle(3, 3)" :class="{'on': styleForm.styleBox3 == 3}" style="width: 33.3333%">
+                        <div class="active-img" v-if="magicForm.images[2]">
+                            <img :src="magicForm.images[2].url"/>
+                        </div>
+                        <div class="notice" v-else>
+                            <span>宽250px</span>
+                            <span>高度不限</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="style-2" v-if="magicForm.style == 4">
+                    <div class="style-left" @click="ckBoxStyle(4, 1)" :class="{'on': styleForm.styleBox4 == 1}">
+                        <div class="active-img" v-if="magicForm.images[0]">
+                            <img :src="magicForm.images[0].url"/>
+                        </div>
+                        <div class="notice" v-else>
+                            <span>375*375px或同比例</span>
+                        </div>
+                    </div>
+                    <div class="style-right">
+                        <div class="style-top" @click="ckBoxStyle(4, 2)" :class="{'on': styleForm.styleBox4 == 2}">
+                            <div class="active-img" v-if="magicForm.images[1]">
+                                <img :src="magicForm.images[1].url"/>
+                            </div>
+                            <div class="notice" v-else>
+                                <span>375*188px或同比例</span>
+                            </div>
+                        </div>
+                        <div class="style-down" @click="ckBoxStyle(4, 3)" :class="{'on': styleForm.styleBox4 == 3}">
+                            <div class="active-img" v-if="magicForm.images[2]">
+                                <img :src="magicForm.images[2].url"/>
+                            </div>
+                            <div class="notice" v-else>
+                                <span>375*188px或同比例</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="style-2" v-if="magicForm.style == 5" style="height: 95px">
+                    <div class="style-2-item" @click="ckBoxStyle(5, 1)" :class="{'on': styleForm.styleBox5 == 1}" style="width: 25%">
+                        <div class="active-img" v-if="magicForm.images[0]">
+                            <img :src="magicForm.images[0].url"/>
+                        </div>
+                        <div class="notice" v-else>
+                            <span>宽188px</span>
+                            <span>高度不限</span>
+                        </div>
+                    </div>
+                    <div class="style-2-item" @click="ckBoxStyle(5, 2)" :class="{'on': styleForm.styleBox5 == 2}" style="width: 25%">
+                        <div class="active-img" v-if="magicForm.images[1]">
+                            <img :src="magicForm.images[1].url"/>
+                        </div>
+                        <div class="notice" v-else>
+                            <span>宽188px</span>
+                            <span>高度不限</span>
+                        </div>
+                    </div>
+                    <div class="style-2-item" @click="ckBoxStyle(5, 3)" :class="{'on': styleForm.styleBox5 == 3}" style="width: 25%">
+                        <div class="active-img" v-if="magicForm.images[2]">
+                            <img :src="magicForm.images[2].url"/>
+                        </div>
+                        <div class="notice" v-else>
+                            <span>宽188px</span>
+                            <span>高度不限</span>
+                        </div>
+                    </div>
+                    <div class="style-2-item" @click="ckBoxStyle(5, 4)" :class="{'on': styleForm.styleBox5 == 4}" style="width: 25%">
+                        <div class="active-img" v-if="magicForm.images[3]">
+                            <img :src="magicForm.images[3].url"/>
+                        </div>
+                        <div class="notice" v-else>
+                            <span>宽188px</span>
+                            <span>高度不限</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="style-2" v-if="magicForm.style == 6">
+                    <div class="style-left">
+                        <div class="style-top" @click="ckBoxStyle(6, 1)" :class="{'on': styleForm.styleBox6 == 1}">
+                            <div class="active-img" v-if="magicForm.images[0]">
+                                <img :src="magicForm.images[0].url"/>
+                            </div>
+                            <div class="notice" v-else>
+                                <span>375*188px或同比例</span>
+                            </div>
+                        </div>
+                        <div class="style-down" @click="ckBoxStyle(6, 2)" :class="{'on': styleForm.styleBox6 == 2}">
+                            <div class="active-img" v-if="magicForm.images[1]">
+                                <img :src="magicForm.images[1].url"/>
+                            </div>
+                            <div class="notice" v-else>
+                                <span>375*188px或同比例</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="style-right">
+                        <div class="style-top" @click="ckBoxStyle(6, 3)" :class="{'on': styleForm.styleBox6 == 3}">
+                            <div class="active-img" v-if="magicForm.images[2]">
+                                <img :src="magicForm.images[2].url"/>
+                            </div>
+                            <div class="notice" v-else>
+                                <span>375*188px或同比例</span>
+                            </div>
+                        </div>
+                        <div class="style-down" @click="ckBoxStyle(6, 4)" :class="{'on': styleForm.styleBox6 == 4}">
+                            <div class="active-img" v-if="magicForm.images[3]">
+                                <img :src="magicForm.images[3].url"/>
+                            </div>
+                            <div class="notice" v-else>
+                                <span>375*188px或同比例</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </el-form-item>
+            <el-form-item label="">
+                <div class="notice-item slider-item" style="margin-top: 5px">
+                    <div class="slider-img" @click="dialogVisible = true">
+                        <img :src="nowImg" v-if="nowImg != ''">
+                        <i class="el-icon-plus" v-else></i>
+                    </div>
+                    <div class="slider-link" style="display: flex;" @click="showPage">
+                        <span style="width: 50px;text-align: right;margin-right: 10px">链接</span>
+                        <el-input v-model="magicForm.link" size="small" :readonly="true"></el-input>
+                    </div>
+                </div>
+            </el-form-item>
+        </el-form>
+        <el-divider></el-divider>
+        <el-form ref="form" :model="magicForm" label-width="80px" label-position="left">
+            <el-form-item label="背景颜色" style="margin-bottom: 20px">
+                <el-color-picker v-model="magicForm.bgColor" style="float: right" size="small"></el-color-picker>
+            </el-form-item>
+            <el-form-item label="背景样式" style="margin-bottom: 20px">
+                <el-button-group style="float: right">
+                    <el-button size="mini" icon="iconfont icon-checkbox" :class="{'primary': magicForm.bgStyle == 'square'}" @click="changeStyle('square')"></el-button>
+                    <el-button size="mini" icon="iconfont icon-yuanjiao" :class="{'primary': magicForm.bgStyle == 'circle'}" @click="changeStyle('circle')"></el-button>
+                </el-button-group>
+            </el-form-item>
+            <el-form-item label="背景边距" style="margin-bottom: 20px">
+                <el-slider
+                        v-model="magicForm.bgMargin"
+                        input-size="mini"
+                        show-input>
+                </el-slider>
+            </el-form-item>
+            <el-form-item label="页面间距">
+                <el-slider
+                        v-model="magicForm.pageMargin"
+                        input-size="mini"
+                        show-input>
+                </el-slider>
+            </el-form-item>
+        </el-form>
+
+        <el-dialog title="" :visible.sync="dialogVisible" width="1200px" class="image-check-dialog">
+            <file-select :need-select="true" @selected-img="selectedImg" @close-dialog="dialogVisible=false" :select-num="1"></file-select>
+        </el-dialog>
+
+        <el-dialog title="" :visible.sync="dialogPageVisible" width="1000px">
+            <pages @selected-page="handleSelect" @close-dialog="dialogPageVisible=false"></pages>
+        </el-dialog>
+    </div>
+</template>
+
+<script>
+    Vue.component('picMagic', {
+        template: '#picMagic',
+        props: {
+            comData: {
+                type: Object
+            }
+        },
+        data() {
+            return {
+                magicForm: {
+                    type: 'picMagic',
+                    title: '图片魔方', // 标题
+                    style: 1, // 样式一
+                    link: '', // 链接
+                    bgColor: '#fff', // 背景颜色
+                    bgStyle: 'square', // 背景样式
+                    bgMargin: 0, // 背景边距
+                    pageMargin: 0, // 页面间距
+                    images: [], // 图片
+                },
+                styleName: '样式一',
+                styleMap: ['样式一', '样式二', '样式三', '样式四', '样式五', '样式六'],
+                styleForm: {
+                    styleBox2: 1, // 样式2选择
+                    styleBox3: 1, // 样式3选择
+                    styleBox4: 1, // 样式4选择
+                    styleBox5: 1, // 样式5选择
+                    styleBox6: 1, // 样式6选择
+                },
+                dialogVisible: false,
+                subIndex: 0,
+                nowImg: '',
+                dialogPageVisible: false
+            }
+        },
+        computed: {
+            componentData() {
+                return JSON.parse(JSON.stringify(this.magicForm));
+            },
+        },
+        watch: {
+            componentData: {
+                handler(newVal, oldVal) {
+                    if (!oldVal) {
+                        return false;
+                    }
+
+                    this.$emit('diy', {type: 'picMagic', form: this.componentData, data: []})
+                },
+                deep: true
+            },
+            comData: {
+                handler(newVal) {
+                    this.magicForm = newVal
+                },
+                deep: true
+            }
+        },
+        created() {
+            if (this.comData) {
+                this.magicForm = this.comData
+            }
+        },
+        methods: {
+            // 选择样式
+            ckStyle(style) {
+                this.magicForm.style = style
+                this.styleName = this.styleMap[style - 1]
+                this.magicForm.images = []
+                this.nowImg = ''
+                this.subIndex = 0
+                this.magicForm.link = ''
+            },
+            // 按钮样式
+            buttonType(type) {
+                if (this.magicForm.style == type) {
+                    return 'primary'
+                }
+            },
+            // 样式选择
+            ckBoxStyle(type, val) {
+                if (type == 2) {
+                    this.styleForm.styleBox2 = val
+                } else if (type == 3) {
+                    this.styleForm.styleBox3 = val
+                } else if (type == 4) {
+                    this.styleForm.styleBox4 = val
+                } else if (type == 5) {
+                    this.styleForm.styleBox5 = val
+                } else if (type == 6) {
+                    this.styleForm.styleBox6 = val
+                }
+
+                this.subIndex = parseInt(val) - 1
+                if (this.magicForm.images[this.subIndex]) {
+                    this.nowImg = this.magicForm.images[this.subIndex].url
+                    this.magicForm.link = this.magicForm.images[this.subIndex].href
+                } else {
+                    this.nowImg = ''
+                    this.magicForm.link = ''
+                }
+            },
+            // 选择了图片
+            selectedImg(img) {
+                if (this.magicForm.style == 1) {
+                    this.subIndex = 0;
+                }
+
+                this.magicForm.images[this.subIndex] = {
+                    url: img[0].url,
+                    href: ''
+                };
+
+                this.nowImg = img[0].url
+                this.$emit('diy', {type: 'picMagic', form: JSON.parse(JSON.stringify(this.magicForm)), data: []})
+                this.dialogVisible = false
+            },
+            // 改变样式
+            changeStyle(style) {
+                this.magicForm.bgStyle = style
+            },
+            // 选择地址
+            showPage() {
+                if (!this.magicForm.images[this.subIndex] || this.magicForm.images[this.subIndex].url == '') {
+                    this.$message.error('请先设置图片')
+                    return false
+                }
+
+                this.dialogPageVisible = true
+            },
+            // 选择地址
+            handleSelect(row) {
+                this.dialogPageVisible = false
+                if (!this.magicForm.images[this.subIndex] || this.magicForm.images[this.subIndex].url == '') {
+                    this.$message.error('请先设置图片')
+                    return false
+                }
+
+                this.magicForm.images[this.subIndex].href = row.path
+                this.magicForm.link = row.path
+            }
+        }
+    })
+</script>
+
+<style>
+.style-1 {
+    /*width: 375px;*/
+    height: 375px;
+    color: #8c8c8c;
+    font-size: 12px;
+    border-radius: 0;
+    border: 1px solid #ddd;
+    text-align: center;
+    display: flex;
+    -webkit-box-align: center;
+    -ms-flex-align: center;
+    align-items: center;
+    -webkit-box-pack: center;
+    -ms-flex-pack: center;
+    justify-content: center;
+    background: #f3f5f7;
+}
+.style-2 {
+    /*width: 375px;*/
+    height: 189px;
+    color: #8c8c8c;
+    font-size: 12px;
+    border-radius: 0;
+    border: 1px solid #ddd;
+    background: #f3f5f7;
+    display: flex;
+}
+.style-2-item {
+    width: 50%;
+    cursor: pointer;
+}
+.notice {
+    flex-direction:column;
+    line-height: 20px;
+    align-items: center;
+    display: flex;
+    width: 100%;
+    height: 100%;
+    justify-content: center;
+}
+.on .notice {
+    border: 1px solid #1890ff!important;
+    color: #1890ff;
+    height: calc(100% - 2px);
+    width: calc(100% - 2px);
+}
+.picMagic .el-form--label-top .el-form-item__label {
+    padding: 0;
+}
+.picMagic .el-form-item {
+    margin-bottom: 0;
+}
+.style-left {
+    width: 50%;
+    height: 100%;
+    cursor: pointer;
+    border-right: 1px solid #ddd;
+}
+.style-right {
+    width: 50%;
+    height: 100%;
+    cursor: pointer;
+}
+.style-top,.style-down {
+    width: 100%;
+    height: 50%;
+    justify-content: center;
+    flex-direction:column;
+}
+.style-top {
+    border-bottom: 1px solid #ddd;
+}
+.style-1 img {
+    width: 100%;
+    height: 100%;
+}
+.style-2 img {
+    width: 100%;
+    height: 100%;
+}
+.slider-img img{
+    width: 100%;
+    height: 100%;
+}
+.on .active-img {
+    border: 1px solid #1890ff!important;
+}
+.active-img {
+    width: calc(100% - 2px);
+    height: calc(100% - 1px);
+}
+</style>

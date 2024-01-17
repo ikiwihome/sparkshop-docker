@@ -1,0 +1,244 @@
+<template id="c-notice">
+    <div>
+        <div class="title-bar">{{ noticeForm.title }}</div>
+        <el-tabs v-model="cTitleActive">
+            <el-tab-pane label="内容设置" name="first">
+                <el-form ref="form" :model="noticeForm" label-width="80px" label-position="right">
+                    <el-form-item label="公告图标">
+                        <div style="display: flex">
+                            <div v-for="item,index in iconMap" :key="index" :class="{'active': noticeForm.icon == item}" style="width: 80px;height: 40px;margin-left: 10px;padding: 5px;cursor: pointer" @click="checkIcon(item)">
+                                <el-image :src="item" style="width: 71px;height: 30px;"></el-image>
+                            </div>
+                        </div>
+                    </el-form-item>
+                    <el-form-item label="滚动方式">
+                        <el-radio v-model="noticeForm.slider" :label="1">上下滚动</el-radio>
+                        <el-radio v-model="noticeForm.slider" :label="2">左右滚动</el-radio>
+                    </el-form-item>
+                    <div v-for="item,index in noticeForm.content" :key="index" class="notice-item">
+                        <el-form-item label="内容">
+                            <el-input v-model="item.title" size="small"></el-input>
+                        </el-form-item>
+                        <el-form-item label="链接">
+                            <div @click="showPage(index)">
+                                <el-input v-model="item.link" size="small" :readonly="true"></el-input>
+                            </div>
+                        </el-form-item>
+                        <i class="el-icon-circle-close btn-del" v-if="index > 0" @click="delNotice(index)"></i>
+                    </div>
+                    <el-button style="margin-top: 10px;width: 100%" @click="addNotice">添加内容</el-button>
+                </el-form>
+            </el-tab-pane>
+            <el-tab-pane label="样式设置" name="second">
+                <el-form ref="form" :model="noticeForm" label-width="80px" label-position="left">
+                    <el-form-item label="背景颜色">
+                        <el-color-picker v-model="noticeForm.bgColor" style="float: right" size="small"></el-color-picker>
+                    </el-form-item>
+                    <el-form-item label="字体颜色">
+                        <el-color-picker v-model="noticeForm.fontColor" style="float: right" size="small"></el-color-picker>
+                    </el-form-item>
+                    <el-form-item label="文字位置">
+                        <el-button-group style="float: right">
+                            <el-button size="mini" icon="iconfont icon-juzuo" :class="{'primary': noticeForm.textAlign == 'left'}" @click="changePosition('left')"></el-button>
+                            <el-button size="mini" icon="iconfont icon-juzhong" :class="{'primary': noticeForm.textAlign == 'center'}" @click="changePosition('center')"></el-button>
+                            <el-button size="mini" icon="iconfont icon-juyouduiqi" :class="{'primary': noticeForm.textAlign == 'right'}" @click="changePosition('right')"></el-button>
+                        </el-button-group>
+                    </el-form-item>
+                    <!--<el-form-item label="文本样式">
+                        <el-button-group style="float: right">
+                            <el-button size="mini" icon="iconfont icon-fontcolormergea" :class="{'primary': noticeForm.textStyle == 'normal'}" ></el-button>
+                            <el-button size="mini" icon="iconfont icon-jiacu-" :class="{'primary': noticeForm.textStyle == 'blob'}" ></el-button>
+                            <el-button size="mini" icon="iconfont icon-fontitalics" :class="{'primary': noticeForm.textStyle == 'italic'}" ></el-button>
+                        </el-button-group>
+                    </el-form-item>-->
+                    <el-form-item label="背景样式">
+                        <el-button-group style="float: right">
+                            <el-button size="mini" icon="iconfont icon-checkbox" :class="{'primary': noticeForm.bgStyle == 'square'}" @click="changeBg('square')"></el-button>
+                            <el-button size="mini" icon="iconfont icon-yuanjiao" :class="{'primary': noticeForm.bgStyle == 'circle'}" @click="changeBg('circle')"></el-button>
+                        </el-button-group>
+                    </el-form-item>
+                    <el-form-item label="背景边距">
+                        <el-slider
+                                v-model="noticeForm.bgMargin"
+                                input-size="mini"
+                                show-input>
+                        </el-slider>
+                    </el-form-item>
+                    <el-form-item label="文本大小">
+                        <el-slider
+                                v-model="noticeForm.fontSize"
+                                input-size="mini"
+                                show-input>
+                        </el-slider>
+                    </el-form-item>
+                    <el-form-item label="页面间距">
+                        <el-slider
+                                v-model="noticeForm.pageMargin"
+                                input-size="mini"
+                                show-input>
+                        </el-slider>
+                    </el-form-item>
+                </el-form>
+            </el-tab-pane>
+        </el-tabs>
+
+        <el-dialog title="" :visible.sync="dialogPageVisible" width="1000px">
+            <pages @selected-page="handleSelect" @close-dialog="dialogPageVisible=false"></pages>
+        </el-dialog>
+    </div>
+</template>
+
+<script>
+    Vue.component('notice', {
+        template: '#c-notice',
+        props: {
+            comData: {
+                type: Object
+            }
+        },
+        data() {
+            return {
+                iconMap: [
+                    '/static/admin/default/image/notice_01.png',
+                    '/static/admin/default/image/notice_02.png'
+                ],
+                noticeForm: {
+                    type: 'notice',
+                    title: '新闻公告', // 标题
+                    icon: '/static/admin/default/image/notice_01.png',
+                    slider: 1, // 滚动方式
+                    content: [
+                        {
+                            title: '',
+                            link: ''
+                        }
+                    ],
+                    bgColor: '#fff', // 背景色
+                    fontColor: '#000', // 字体颜色
+                    textAlign: 'left', // 文字位置
+                    textStyle: 'normal', // 文字样式
+                    bgStyle: 'square', // 背景样式
+                    bgMargin: 0, // 背景边距
+                    fontSize: 14, // 文本大小
+                    pageMargin: 0 // 页面间距
+                },
+                cTitleActive: 'first',
+                dialogPageVisible: false
+            }
+        },
+        computed: {
+            componentData() {
+                return JSON.parse(JSON.stringify(this.noticeForm));
+            },
+        },
+        watch: {
+            componentData: {
+                handler(newVal, oldVal) {
+                    if (!oldVal) {
+                        return false;
+                    }
+
+                    this.$emit('diy', {type: 'notice', form: this.componentData, data: []})
+                },
+                deep: true
+            },
+            comData: {
+                handler(newVal) {
+                    this.noticeForm = newVal
+                },
+                deep: true
+            }
+        },
+        created() {
+            if (this.comData) {
+                this.noticeForm = this.comData
+            }
+        },
+        methods: {
+            // 切换图标
+            checkIcon(icon) {
+                this.noticeForm.icon = icon
+            },
+            // 添加内容
+            addNotice() {
+                this.noticeForm.content.push({
+                    title: '',
+                    link: ''
+                })
+            },
+            // 删除内容
+            delNotice(index) {
+                this.noticeForm.content.splice(index, 1)
+            },
+            // 设置位置
+            changePosition(type) {
+                this.noticeForm.textAlign = type
+            },
+            // 改变背景样式
+            changeBg(type) {
+                this.noticeForm.bgStyle = type
+            },
+            // 选择地址
+            showPage(index) {
+                this.dialogPageVisible = true
+                this.nowIndex = index
+            },
+            // 选择地址
+            handleSelect(row) {
+                this.dialogPageVisible = false
+                this.noticeForm.content[this.nowIndex].link = row.path
+            }
+        }
+    })
+</script>
+
+<style>
+    .title-bar {
+        width: 80%;
+        height: 45px;
+        line-height: 45px;
+        padding-left: 24px;
+        color: #000;
+        border-radius: 4px;
+        border-bottom: 1px solid #eee;
+        font-size: 14px;
+    }
+    .primary {
+        color: #FFF;
+        background-color: #409EFF;
+        border-color: #409EFF;
+    }
+    .notice-item {
+        margin-top: 23px;
+        padding: 20px 10px 10px 10px;
+        border: 1px solid #eee;
+        -webkit-box-shadow: 0 0 10px #eee;
+        box-shadow: 0 0 10px #eee;
+        position: relative;
+    }
+    .btn-del {
+        position: absolute;
+        right: 0;
+        top: -11px;
+        font-size: 24px;
+        cursor: pointer;
+        color: #606266;
+    }
+    .active {
+        border: 2px solid #409EFF;
+    }
+    .el-tabs__active-bar {
+        width: 40% !important;
+        margin-left: 5%;
+    }
+    #tab-first, #tab-second {
+        width: 50%;
+        text-align: center;
+    }
+    .el-tabs__nav {
+        width: 100%;
+    }
+    .notice-item .el-form-item {
+        margin-bottom: 0 !important;
+    }
+</style>

@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>充值余额</title>
+    <link rel="stylesheet" href="{__CSS__}/element_ui.css"/>
+    <link rel="stylesheet" href="{__CSS__}/style.css"/>
+    <script src="{__JS__}/vue2.js"></script>
+    <script src="{__JS__}/element_ui.js"></script>
+    <script src="{__JS__}/axios.min.js"></script>
+    <script src="{__JS__}/request.js"></script>
+</head>
+<body>
+<div id="app">
+    <div class="app-loading" v-if="pageLoading">
+        <div class="app-loading__logo">
+            <img src="{__IMG__}/logo.png"/>
+        </div>
+        <div class="app-loading__loader"></div>
+        <div class="app-loading__title">SparkShop</div>
+    </div>
+    <el-card class="box-card" v-else>
+        <div slot="header" class="clearfix">
+            <span>余额充值记录</span>
+        </div>
+        <div class="search-box">
+            <el-form :model="searchForm" label-width="80px">
+                <el-form-item label="状态">
+                    <el-button-group>
+                        <el-button :type="buttonType('status', 0)" size="small" @click="checkTab(0)">全部</el-button>
+                        <el-button :type="buttonType('status', 1)" size="small" @click="checkTab(1)">待支付</el-button>
+                        <el-button :type="buttonType('status', 2)" size="small" @click="checkTab(2)">支付成功</el-button>
+                        <el-button :type="buttonType('status', 3)" size="small" @click="checkTab(3)">支付失败</el-button>
+                        <el-button :type="buttonType('status', 4)" size="small" @click="checkTab(4)">超时关闭</el-button>
+                    </el-button-group>
+                </el-form-item>
+            </el-form>
+            <el-form :inline="true" :model="searchForm" class="demo-form-inline" label-width="80px">
+                <el-form-item label="充值人id">
+                    <el-input v-model="searchForm.user_id" placeholder="" clearable size="small"></el-input>
+                </el-form-item>
+                <el-form-item label="充值日期">
+                    <el-date-picker
+                        v-model="searchForm.date"
+                        value-format="yyyy-MM-dd"
+                        type="date"
+                        size="small"
+                        placeholder="选择日期">
+                    </el-date-picker>
+                </el-form-item>
+                <el-form-item>
+                    <el-button type="primary" @click="onSubmit" size="small" icon="el-icon-search">查询</el-button>
+                </el-form-item>
+            </el-form>
+        </div>
+        <div style="width:100%;height:0;border-bottom:#E4E7ED 1px dashed;margin-bottom: 10px"></div>
+        <el-table
+                :data="tableData"
+                style="width: 100%;">
+            <el-table-column
+                    prop="recharge_no"
+                    label="充值单号">
+            </el-table-column>
+            <el-table-column
+                    prop="pay_no"
+                    label="支付单号">
+            </el-table-column>
+            <el-table-column
+                    label="用户信息">
+                <template slot-scope="scope">
+                    ID: {{ scope.row.user_id }}<br/>
+                    用户名: {{ scope.row.username }}
+                </template>
+            </el-table-column>
+            <el-table-column
+                    prop="amount"
+                    label="充值金额">
+            </el-table-column>
+            <el-table-column
+                    label="充值方式">
+                <template slot-scope="scope">
+                    <span v-if="scope.row.pay_way == 1">微信</span>
+                    <span v-if="scope.row.pay_way == 2">支付宝</span>
+                </template>
+            </el-table-column>
+            <el-table-column
+                    label="状态">
+                <template slot-scope="scope">
+                    <span v-if="scope.row.status == 1">待支付</span>
+                    <span v-if="scope.row.status == 2">支付成功</span>
+                    <span v-if="scope.row.status == 3">支付失败</span>
+                    <span v-if="scope.row.status == 4">超时关闭</span>
+                </template>
+            </el-table-column>
+            <el-table-column
+                    prop="third_no"
+                    label="三方单号">
+            </el-table-column>
+            <el-table-column
+                    prop="create_time"
+                    label="充值时间">
+            </el-table-column>
+        </el-table>
+        <el-pagination
+                style="margin-top: 10px"
+                background
+                layout="->, prev, pager, next"
+                :page-size="searchForm.limit"
+                @current-change="handlePageChange"
+                :total="total">
+        </el-pagination>
+
+    </el-card>
+</div>
+
+<script>
+    new Vue({
+        el: '#app',
+        data: function () {
+            return {
+                pageLoading: true,
+                searchForm: {
+                    user_id: '',
+                    status: 0,
+                    date: '',
+                    limit: 15,
+                    page: 1
+                },
+                total: 0,
+                tableData: []
+            }
+        },
+        mounted() {
+            this.getList()
+            this.pageLoading = false
+        },
+        methods: {
+            checkTab(status) {
+                this.searchForm.status = status
+                this.searchForm.page = 1
+                this.getList()
+            },
+            // 获取列表
+            async getList() {
+                let res = await request.get('/admin/financeLog/index', this.searchForm)
+                this.tableData = res.data.data
+                this.total = res.data.total
+            },
+            // 分页
+            handlePageChange(page) {
+                this.searchForm.page = page
+                this.getList()
+            },
+            // 查询
+            onSubmit() {
+                this.searchForm.page = 1
+                this.getList()
+            },
+            // 选择样式
+            buttonType(field, type) {
+                if (field == 'status') {
+                    if (this.searchForm.status == type) {
+                        return 'primary'
+                    }
+                }
+            }
+        }
+    });
+</script>
+<style>
+    p {
+        padding: 0;
+        margin: 0;
+    }
+
+    .el-table__header tr,
+    .el-table__header th {
+        padding: 0;
+        height: 20px;
+        line-height: 20px;
+    }
+
+    .del-btn {
+        cursor: pointer;
+        color: #F56C6C
+    }
+
+    .add-btn {
+        cursor: pointer;
+        margin-top: 18px;
+        color: #409EFF
+    }
+    .primary {
+        color: #FFF;
+        background-color: #409EFF;
+        border-color: #409EFF;
+    }
+
+    .goods-select .el-dialog__header {
+        display: none;
+    }
+    .goods-select  .el-dialog__body {padding: 0;}
+</style>
+</body>
+</html>

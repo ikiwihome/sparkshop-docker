@@ -1,0 +1,159 @@
+<template id="c-news">
+    <div>
+        <div class="title-bar">{{ newsForm.title }}</div>
+        <el-tabs v-model="cTitleActive">
+            <el-tab-pane label="内容设置" name="first" label-position="left">
+                <el-form ref="form" :model="newsForm" label-width="80px">
+                    <el-form-item label="文章分类">
+                        <el-select v-model="newsForm.cate_id" placeholder="请选择分类" size="small" style="width: 100%" clearable>
+                            <el-option :label="item.name" :value="item.id" v-for="item in cateData" :key="item.id"></el-option>
+                        </el-select>
+                    </el-form-item>
+                    <el-form-item label="文章数量">
+                        <el-input v-model="newsForm.num" type="number" size="small"></el-input>
+                    </el-form-item>
+                </el-form>
+            </el-tab-pane>
+            <el-tab-pane label="样式设置" name="second">
+                <el-form ref="form" :model="newsForm" label-width="80px" label-position="left">
+                    <el-form-item label="背景颜色">
+                        <el-color-picker v-model="newsForm.bgColor" style="float: right" size="small"></el-color-picker>
+                    </el-form-item>
+                    <el-form-item label="字体颜色">
+                        <el-color-picker v-model="newsForm.fontColor" style="float: right" size="small"></el-color-picker>
+                    </el-form-item>
+                    <el-form-item label="文字位置">
+                        <span>居左</span>
+                        <el-button-group style="float: right">
+                            <el-button size="mini" icon="iconfont icon-juzuo" :class="{'primary': newsForm.textAlign == 'left'}" @click="changeTxt('left')"></el-button>
+                            <el-button size="mini" icon="iconfont icon-juyouduiqi" :class="{'primary': newsForm.textAlign == 'right'}" @click="changeTxt('right')"></el-button>
+                        </el-button-group>
+                    </el-form-item>
+                    <el-form-item label="内容样式">
+                        <el-button-group style="float: right">
+                            <el-button size="mini" icon="iconfont icon-checkbox" :class="{'primary': newsForm.bgStyle == 'square'}" @click="changeBg('square')"></el-button>
+                            <el-button size="mini" icon="iconfont icon-yuanjiao" :class="{'primary': newsForm.bgStyle == 'circle'}" @click="changeBg('circle')"></el-button>
+                        </el-button-group>
+                    </el-form-item>
+                    <el-form-item label="背景边距">
+                        <el-slider
+                                v-model="newsForm.bgMargin"
+                                input-size="mini"
+                                show-input>
+                        </el-slider>
+                    </el-form-item>
+                    <el-form-item label="文本大小">
+                        <el-slider
+                                v-model="newsForm.fontSize"
+                                input-size="mini"
+                                show-input>
+                        </el-slider>
+                    </el-form-item>
+                    <el-form-item label="页面间距">
+                        <el-slider
+                                v-model="newsForm.pageMargin"
+                                input-size="mini"
+                                show-input>
+                        </el-slider>
+                    </el-form-item>
+                </el-form>
+            </el-tab-pane>
+        </el-tabs>
+    </div>
+</template>
+
+<script>
+    Vue.component('news', {
+        template: '#c-news',
+        props: {
+            comData: {
+                type: Object
+            }
+        },
+        data() {
+            return {
+                newsForm: {
+                    type: 'news',
+                    title: '新闻列表', // 标题
+                    cate_id: '', // 分类id
+                    num: 3, // 文章数量
+                    bgColor: '#fff',
+                    fontColor: '#000', // 字体颜色
+                    textAlign: 'left', // 文字位置
+                    bgStyle: 'square', // 背景样式
+                    bgMargin: 0, // 背景边距
+                    fontSize: 15, // 文本大小
+                    pageMargin: 0 // 页面间距
+                },
+                cTitleActive: 'first',
+                cateData: [],
+                articleData: []
+            }
+        },
+        computed: {
+            componentData() {
+                return JSON.parse(JSON.stringify(this.newsForm));
+            },
+        },
+        watch: {
+            componentData: {
+                handler(newVal, oldVal) {
+                    if (!oldVal) {
+                        return false;
+                    }
+
+                    if (newVal.cate_id != oldVal.cate_id) {
+                        this.getArticle(1)
+                    } else {
+                        this.$emit('diy', {type: 'news', form: this.componentData, data: this.articleData})
+                    }
+                },
+                deep: true
+            },
+            comData: {
+                handler(newVal) {
+                    this.newsForm = newVal
+                },
+                deep: true
+            }
+        },
+        created() {
+            if (this.comData) {
+                this.newsForm = this.comData
+            }
+        },
+        mounted() {
+            this.getArticleCate()
+        },
+        methods: {
+            // 获取文章分类
+            async getArticleCate() {
+                let res = await request.get("/addons/diy/admin.api/getArticleCate")
+                this.cateData = res.data
+
+                this.getArticle(1)
+            },
+            // 获取文章
+            async getArticle(type = 0) {
+                let res = await request.get("/addons/diy/admin.api/getArticle", {limit: this.newsForm.num, cate_id: this.newsForm.cate_id})
+                this.articleData = res.data
+
+                if (type > 0) {
+                    this.$emit('diy', {type: 'news', form: this.componentData, data: this.articleData})
+                }
+            },
+            // 改变背景
+            changeBg(type) {
+                this.newsForm.bgStyle = type
+            },
+            // 改变字体位置
+            changeTxt(type) {
+                this.newsForm.textAlign = type
+            }
+        }
+    })
+</script>
+
+<style>
+
+</style>

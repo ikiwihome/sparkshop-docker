@@ -1,0 +1,42 @@
+<el-form :model="form" :rules="rules" ref="ruleForm"  label-width="80px">
+    <el-form-item label="等级名称" prop="name">
+        <el-input v-model="form.name" style="width: 500px"></el-input>
+    </el-form-item>
+    <el-form-item label="等级值" prop="level">
+        <el-input v-model="form.level" type="number" style="width: 500px"></el-input>
+    </el-form-item>
+    <el-form-item label="上浮比例" prop="percent">
+        <el-input v-model="form.percent" type="number" style="width: 500px"></el-input>
+        <p style="font-size: 12px;color: #999">提成比例 例如：10%，则填写 0.1。此处的上浮比例是在一级分佣比例基础上额外上浮的比例。</p>
+    </el-form-item>
+    <el-form-item label="升级方式" prop="level_up_way">
+        <el-radio-group v-model="form.level_up_way" size="medium">
+            <el-radio border :label="1">满足以下任意条件</el-radio>
+            <el-radio border :label="2">满足以下全部条件</el-radio>
+        </el-radio-group>
+        <el-checkbox-group @change="checkedTips" v-model="checkedTipsMap">
+            <el-checkbox :label="item.field" v-for="item in levelUpTips" :key="item.field">{{ item.name }}</el-checkbox>
+        </el-checkbox-group>
+        <el-table
+                :data="checkedMap"
+                border
+                style="width: 100%;margin-top: 10px">
+            <el-table-column
+                    label="条件">
+                <template slot-scope="scope">
+                    {{ scope.row.name }}
+                </template>
+            </el-table-column>
+            <el-table-column
+                    label="条件值">
+                <template slot-scope="scope">
+                    <el-input v-model="scope.row.value"></el-input>
+                </template>
+            </el-table-column>
+        </el-table>
+    </el-form-item>
+</el-form>
+<div slot="footer" class="dialog-footer">
+    <el-button @click="dialogVisible = false" size="small">取 消</el-button>
+    <el-button type="primary" @click="optSubmit('ruleForm')" size="small" :loading="loading">确 定</el-button>
+</div>

@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>插件后台</title>
+    <link rel="stylesheet" href="{__CSS__}/element_ui.css"/>
+    <link rel="stylesheet" href="{__CSS__}/style.css"/>
+    <script src="{__JS__}/vue2.js"></script>
+    <script src="{__JS__}/element_ui.js"></script>
+    <script src="{__JS__}/axios.min.js"></script>
+    <script src="{__JS__}/request.js"></script>
+    <style>
+        .page-content {
+            height: 100%;
+            width: 395px;
+            border: none;
+        }
+
+        .preview {
+            width: 380px;
+            height: 750px;
+            overflow: hidden;
+        }
+
+        .el-tabs__header {
+            width: 100px;
+        }
+    </style>
+</head>
+<body>
+<div id="app">
+    <div class="app-loading" v-if="pageLoading">
+        <div class="app-loading__logo">
+            <img src="{__IMG__}/logo.png"/>
+        </div>
+        <div class="app-loading__loader"></div>
+        <div class="app-loading__title">SparkShop</div>
+    </div>
+    <el-card class="box-card" v-else>
+        <div slot="header" class="clearfix">
+            <span>手机端装修</span>
+        </div>
+        <el-tabs :tab-position="tabPosition" style="height: 800px;">
+            <el-tab-pane label="首页" style="width: 200px">
+                <div style="width: 1000px;display: flex">
+                    <div class="preview">
+                        <iframe ref="iframe" :src="h5Url" frameborder="0" allowtransparency="yes"
+                                class="page-content"></iframe>
+                    </div>
+                    <el-button type="primary" style="margin-left: 60px;height: 40px" @click="goDiy">装修</el-button>
+                </div>
+            </el-tab-pane>
+            <!--<el-tab-pane label="分类">
+
+            </el-tab-pane>-->
+        </el-tabs>
+    </el-card>
+</div>
+
+<script>
+    new Vue({
+        el: '#app',
+        data: function () {
+            return {
+                tabPosition: 'left',
+                h5Url: '/admin/addons/diy/admin.diy/preview',
+                pageLoading: true,
+                baseIndex: '/{:config("shop.backend_index")}/',
+            }
+        },
+        mounted() {
+            this.pageLoading = false
+        },
+        methods: {
+            // 前往diy设计
+            goDiy() {
+                window.location.href = this.baseIndex + 'addons/diy/admin.diy/edit'
+            }
+        }
+    });
+</script>
+<style>
+
+</style>
+</body>
+</html>

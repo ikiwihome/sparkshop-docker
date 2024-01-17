@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>佣金提现</title>
+    <link rel="stylesheet" href="{__CSS__}/element_ui.css"/>
+    <link rel="stylesheet" href="{__CSS__}/style.css"/>
+    <script src="{__JS__}/vue2.js"></script>
+    <script src="{__JS__}/element_ui.js"></script>
+    <script src="{__JS__}/axios.min.js"></script>
+    <script src="{__JS__}/request.js"></script>
+</head>
+<body>
+<div id="app">
+    <div class="app-loading" v-if="pageLoading">
+        <div class="app-loading__logo">
+            <img src="{__IMG__}/logo.png"/>
+        </div>
+        <div class="app-loading__loader"></div>
+        <div class="app-loading__title">SparkShop</div>
+    </div>
+    <el-card class="box-card" v-else>
+        <div slot="header" class="clearfix">
+            <span>佣金提现</span>
+        </div>
+        <div class="search-box">
+            <el-form :model="searchForm" label-width="80px">
+                <el-form-item label="状态">
+                    <el-button-group>
+                        <el-button :type="buttonType('status', 0)" size="small" @click="checkTab(0)">全部</el-button>
+                        <el-button :type="buttonType('status', 1)" size="small" @click="checkTab(1)">待审批</el-button>
+                        <el-button :type="buttonType('status', 2)" size="small" @click="checkTab(2)">通过</el-button>
+                        <el-button :type="buttonType('status', 3)" size="small" @click="checkTab(3)">拒绝</el-button>
+                    </el-button-group>
+                </el-form-item>
+            </el-form>
+            <el-form :inline="true" :model="searchForm" class="demo-form-inline" label-width="80px">
+                <el-form-item label="提现人ID">
+                    <el-input v-model="searchForm.user_id" placeholder="" clearable size="small"></el-input>
+                </el-form-item>
+                <el-form-item label="提现时间">
+                    <el-date-picker
+                            v-model="searchForm.date"
+                            value-format="yyyy-MM-dd"
+                            type="date"
+                            size="small"
+                            placeholder="选择日期">
+                    </el-date-picker>
+                </el-form-item>
+                <el-form-item>
+                    <el-button type="primary" @click="onSubmit" size="small" icon="el-icon-search">查询</el-button>
+                </el-form-item>
+            </el-form>
+        </div>
+        <div style="width:100%;height:0;border-bottom:#E4E7ED 1px dashed;margin-top: 15px"></div>
+        <el-table
+                :data="tableData"
+                style="width: 100%;">
+            <el-table-column
+                    label="提现人">
+                <template slot-scope="scope">
+                    <span>ID：{{ scope.row.user_id }}</span><br/>
+                    <span>昵称：{{ scope.row.user.nickname }}</span><br/>
+                    <span>手机号：{{ scope.row.user.phone }}</span>
+                </template>
+            </el-table-column>
+            <el-table-column
+                    prop="type"
+                    label="提现方式">
+            </el-table-column>
+            <el-table-column
+                    label="提现信息">
+                <template slot-scope="scope">
+                    <div v-if="scope.row.type == '银行卡'">
+                        卡号: {{ scope.row.card_no }}<br/>
+                        持卡人: {{ scope.row.name }}<br/>
+                        银行: {{ scope.row.bank }}
+                    </div>
+                    <div v-else>
+                        账号: {{ scope.row.account }}
+                    </div>
+                </template>
+            </el-table-column>
+            <el-table-column
+                    label="收款码">
+                <template slot-scope="scope">
+                    <el-image
+                        style="width: 40px; height: 40px"
+                        :src="scope.row.receive_qrcode"
+                        :preview-src-list="[scope.row.receive_qrcode]">
+                        <div slot="error" class="image-slot">
+                            <i class="el-icon-picture-outline"></i>
+                        </div>
+                    </el-image>
+                </template>
+            </el-table-column>
+            <el-table-column
+                    prop="apply_amount"
+                    label="提现金额">
+            </el-table-column>
+            <el-table-column
+                    label="状态">
+                <template slot-scope="scope">
+                    <el-tag type="success" v-if="scope.row.status == 2">通过</el-tag>
+                    <el-tag v-if="scope.row.status == 1">待审批</el-tag>
+                    <el-tag type="danger" v-if="scope.row.status == 3">拒绝</el-tag>
+                </template>
+            </el-table-column>
+            <el-table-column
+                    prop="operation"
+                    label="操作">
+                <template slot-scope="scope">
+                    <el-button @click="handleCheck(scope.row)" type="text" size="small" v-if="scope.row.status == 1">审核</el-button>
+                </template>
+            </el-table-column>
+        </el-table>
+        <el-pagination
+                style="margin-top: 10px"
+                background
+                layout="->, prev, pager, next"
+                :page-size="searchForm.limit"
+                @current-change="handlePageChange"
+                :total="total">
+        </el-pagination>
+
+        <el-dialog :title="title" :visible.sync="dialogVisible" width="600px" :close-on-click-modal="false">
+            <el-form ref="form" :model="form" label-width="80px">
+                <el-form-item label="提现金额">
+                    <el-input v-model="form.amount" :disabled="true"></el-input>
+                </el-form-item>
+                <el-form-item label="审核意见">
+                    <el-radio-group v-model="form.type">
+                        <el-radio :label="1">同意打款</el-radio>
+                        <el-radio label="2">拒绝打款</el-radio>
+                    </el-radio-group>
+                </el-form-item>
+                <el-form-item label="打款备注">
+                    <el-input type="textarea" v-model="form.remark" :rows="4"></el-input>
+                </el-form-item>
+                <el-form-item>
+                    <el-button type="primary" @click="onSave">确定提交</el-button>
+                </el-form-item>
+            </el-form>
+        </el-dialog>
+    </el-card>
+</div>
+
+<script>
+    new Vue({
+        el: '#app',
+        data: function () {
+            return {
+                pageLoading: true,
+                searchForm: {
+                    date: '',
+                    user_id: '',
+                    status: 0,
+                    limit: 15,
+                    page: 1
+                },
+                form: {
+                    id: 0,
+                    amount: 0,
+                    type: 1,
+                    remark: ''
+                },
+                dialogVisible: false,
+                title: '审核',
+                total: 1,
+                tableData: []
+            }
+        },
+        mounted() {
+            this.getList()
+            this.pageLoading = false
+        },
+        methods: {
+            // 获取列表
+            async getList() {
+                let res = await request.get('/addons/agent/admin.agent/applyLog', this.searchForm)
+                this.tableData = res.data.data
+                this.total = res.data.total
+            },
+            // 搜索
+            onSubmit() {
+                this.searchForm.page = 1
+                this.getList()
+            },
+            // 审核
+            handleCheck(row) {
+                this.dialogVisible = true
+                this.form = this.$options.data().form
+                this.form.amount = row.apply_amount
+                this.form.id = row.id
+            },
+            // 筛选状态
+            checkTab(status) {
+                this.searchForm.status = status
+                this.searchForm.page = 1
+                this.getList()
+            },
+            // 分页
+            handlePageChange(page) {
+                this.searchForm.page = page
+                this.getList()
+            },
+            // 保存
+            async onSave() {
+                let res = await request.post('/addons/agent/admin.agent/applyLog', this.form)
+                if (res.code == 0) {
+                    this.$message.success(res.msg)
+                    this.dialogVisible = false
+                    this.getList()
+                } else {
+                    this.$message.error(res.msg)
+                }
+            },
+            // 选择样式
+            buttonType(field, type) {
+                if (field == 'status') {
+                    if (this.searchForm.status == type) {
+                        return 'primary'
+                    }
+                }
+            }
+        }
+    });
+</script>
+<style>
+    .el-table__header tr,
+    .el-table__header th {
+        padding: 0;
+        height: 20px;
+        line-height: 20px;
+    }
+    p { padding: 0;
+        margin: 0;}
+    .primary {
+        color: #FFF;
+        background-color: #409EFF;
+        border-color: #409EFF;
+    }
+</style>
+</body>
+</html>

@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>分销用户</title>
+    <link rel="stylesheet" href="{__CSS__}/element_ui.css"/>
+    <link rel="stylesheet" href="{__CSS__}/style.css"/>
+    <script src="{__JS__}/vue2.js"></script>
+    <script src="{__JS__}/element_ui.js"></script>
+    <script src="{__JS__}/axios.min.js"></script>
+    <script src="{__JS__}/request.js"></script>
+</head>
+<body>
+<div id="app">
+    <div class="app-loading" v-if="pageLoading">
+        <div class="app-loading__logo">
+            <img src="{__IMG__}/logo.png"/>
+        </div>
+        <div class="app-loading__loader"></div>
+        <div class="app-loading__title">SparkShop</div>
+    </div>
+    <el-card class="box-card" v-else>
+        <div slot="header" class="clearfix">
+            <span>分销用户</span>
+        </div>
+        <div class="search-box">
+            <el-form :inline="true" :model="searchForm" class="demo-form-inline" style="margin-top: 20px;">
+                <el-form-item label="用户ID">
+                    <el-input v-model="searchForm.user_id" placeholder="" clearable size="small"></el-input>
+                </el-form-item>
+                <el-form-item>
+                    <el-button type="primary" @click="onSubmit" size="small" icon="el-icon-search" >查询</el-button>
+                </el-form-item>
+            </el-form>
+        </div>
+        <div style="width:100%;height:0;border-bottom:#E4E7ED 1px dashed;margin-bottom: 15px"></div>
+        <div style="background: #f5f7f9;padding: 10px 20px 20px 10px;">
+            <el-row :gutter="15" style="margin-top: 20px">
+                <el-col :lg="3">
+                    <div class="function-card">
+                        <a href="javaScript:;">
+                            <i class="el-icon-user-solid icon-style"></i>
+                            <p>分销人员：{{ census.total_user }} 人</p>
+                        </a>
+                    </div>
+                </el-col>
+                <el-col :lg="3">
+                    <div class="function-card">
+                        <a href="javaScript:;">
+                            <i class="el-icon-cloudy icon-style" style="color: #67C23A"></i>
+                            <p>推广用户数：{{ census.agent_user }} 人</p>
+                        </a>
+                    </div>
+                </el-col>
+                <el-col :lg="3">
+                    <div class="function-card">
+                        <a href="javaScript:;">
+                            <i class="el-icon-document icon-style" style="color: #67C23A"></i>
+                            <p>订单数：{{ census.order_num }} 单</p>
+                        </a>
+                    </div>
+                </el-col>
+                <el-col :lg="3">
+                    <div class="function-card">
+                        <a href="javaScript:;">
+                            <i class="el-icon-money icon-style" style="color: #F56C6C"></i>
+                            <p>订单金额：{{ census.order_amount }} 元</p>
+                        </a>
+                    </div>
+                </el-col>
+                <el-col :lg="3">
+                    <div class="function-card">
+                        <a href="javascript:;">
+                            <i class="el-icon-message icon-style"></i>
+                            <p>提现次数：{{ census.draw_num }} 次</p>
+                        </a>
+                    </div>
+                </el-col>
+                <el-col :lg="3">
+                    <div class="function-card">
+                        <a href="javascript:;">
+                            <i class="el-icon-money icon-style" style="color: #67C23A"></i>
+                            <p>剩余提现金额：{{ census.residue_amount }} 元</p>
+                        </a>
+                    </div>
+                </el-col>
+
+            </el-row>
+        </div>
+        <div style="width:100%;height:0;border-bottom:#E4E7ED 1px dashed;margin-bottom: 15px"></div>
+        <el-table
+                :data="tableData"
+                style="width: 100%;">
+            <el-table-column
+                    width="100px"
+                    label="头像">
+                <template slot-scope="scope">
+                    <el-image :src="scope.row.user.avatar" style="width: 36px;height: 36px"></el-image>
+                </template>
+            </el-table-column>
+            <el-table-column
+                    label="用户信息">
+                <template slot-scope="scope">
+                    <span>昵称：{{ scope.row.user.nickname }}</span><br/>
+                    <span>手机号：{{ scope.row.user.phone }}</span>
+                </template>
+            </el-table-column>
+            <el-table-column
+                    prop="level.name"
+                    label="分销等级">
+            </el-table-column>
+            <el-table-column
+                    prop="spread_num"
+                    label="分销人数">
+            </el-table-column>
+            <el-table-column
+                    label="提成订单数">
+                <template slot-scope="scope">
+                    {{ scope.row.agent_order_num + scope.row.self_buy_num }}
+                </template>
+            </el-table-column>
+            <el-table-column
+                    prop="total_order_amount"
+                    label="提成订单总额">
+            </el-table-column>
+            <el-table-column
+                    prop="total_bonus"
+                    label="总佣金数">
+            </el-table-column>
+            <el-table-column
+                    prop="draw_amount"
+                    label="已提款金额">
+            </el-table-column>
+            <el-table-column
+                    prop="draw_num"
+                    label="已提款次数">
+            </el-table-column>
+            <el-table-column
+                    prop="residue_amount"
+                    label="剩余佣金">
+            </el-table-column>
+            <el-table-column
+                    label="上级推广人">
+                <template slot-scope="scope">
+                    <span v-if="scope.row.parent">{{ scope.row.parent.nickname }} | ID: {{ scope.row.parent.id }}</span>
+                </template>
+            </el-table-column>
+            <el-table-column
+                    prop="operation"
+                    fixed="right"
+                    width="150px"
+                    label="操作">
+                <template slot-scope="scope">
+                    <el-button @click="handleUser(scope.row)" type="text" size="small">推广人</el-button>
+                    <el-divider direction="vertical"></el-divider>
+                    <el-dropdown @command="handleMore($event, scope.row)">
+                        <span class="el-dropdown-link" style="font-size: 12px">
+                        更多 <i class="el-icon-arrow-down el-icon--right"></i>
+                        </span>
+                        <el-dropdown-menu slot="dropdown">
+                            <el-dropdown-item command="order">推广订单</el-dropdown-item>
+                            <el-dropdown-item command="cancel">取消资格</el-dropdown-item>
+                            <el-dropdown-item command="level">修改等级</el-dropdown-item>
+                        </el-dropdown-menu>
+                    </el-dropdown>
+                </template>
+            </el-table-column>
+        </el-table>
+        <el-pagination
+                style="margin-top: 10px"
+                background
+                layout="->, prev, pager, next"
+                :page-size="searchForm.limit"
+                @current-change="handlePageChange"
+                :total="total">
+        </el-pagination>
+
+        <el-dialog title="推广人" :visible.sync="agentUserDialogVisible" width="1000px">
+            {include file="/admin/agent_user/detail"}
+        </el-dialog>
+
+        <el-dialog title="推广订单" :visible.sync="agentOrderDialogVisible" width="1000px">
+            {include file="/admin/agent_user/order"}
+        </el-dialog>
+
+        <el-dialog title="修改等级" :visible.sync="levelDialogVisible" width="500px" :close-on-click-modal="false">
+            <el-select v-model="agentLevel" placeholder="请选择" style="width: 100%">
+                <el-option
+                    v-for="item in levelMap"
+                    :key="item.id"
+                    :label="item.name"
+                    :value="item.id">
+                </el-option>
+            </el-select>
+            <el-button type="primary" @click="updateLevel" size="small" style="margin-top: 5px">确认修改</el-button>
+        </el-dialog>
+    </el-card>
+</div>
+
+<script>
+    new Vue({
+        el: '#app',
+        data: function () {
+            return {
+                pageLoading: true,
+                searchForm: {
+                    user_id: '',
+                    limit: 15,
+                    page: 1
+                },
+                total: 1,
+                tableData: [],
+                loading: false,
+                census: {
+                    total_user: 0,
+                    agent_user: 0,
+                    order_num: 0,
+                    order_amount: 0,
+                    draw_num: 0,
+                    residue_amount: 0
+                },
+                agentUserDialogVisible: false,
+                agentUserForm: {
+                    page: 1,
+                    limit: 10,
+                    parent_spread_id: 1
+                },
+                agentTableData: [],
+                agentUserTotal: 0,
+                agentOrderDialogVisible: false,
+                agentOrderForm: {
+                    page: 1,
+                    limit: 10,
+                    user_id: 1
+                },
+                agentOrderTableData: [],
+                agentOrderTotal: 0,
+                levelMap: [],
+                levelDialogVisible: false,
+                agentLevel: '',
+                nowUser: {}
+            }
+        },
+        mounted() {
+            this.getList()
+            this.pageLoading = false
+        },
+        methods: {
+            // 获取列表
+            async getList() {
+                let res = await request.get("/addons/agent/admin.agentUser/index", this.searchForm)
+                this.tableData = res.data.list.data
+                this.total = res.data.list.total
+
+                this.census = res.data.census
+            },
+            // 分页
+            handlePageChange(page) {
+                this.searchForm.page = page
+                this.getList()
+            },
+            // 搜索
+            onSubmit() {
+                this.searchForm.page = 1
+                this.getList()
+            },
+            // 推广人
+            handleUser(item) {
+                this.agentUserForm.parent_spread_id = item.user_id
+                this.getAgentUserList();
+                this.agentUserDialogVisible = true
+            },
+            // 推广人列表
+            async getAgentUserList() {
+                let res = await request.get("/addons/agent/admin.agentUser/detail", this.agentUserForm)
+                this.agentTableData = res.data.data
+                this.agentUserTotal = res.data.total
+            },
+            handleAgentUserPageChange(page) {
+                this.agentUserForm.page = page
+                this.getAgentUserList();
+            },
+            // 推广订单列表
+            async getAgentOrderList() {
+                let res = await request.get("/addons/agent/admin.agentUser/order", this.agentOrderForm)
+                this.agentOrderTableData = res.data.data
+                this.agentOrderTotal = res.data.total
+            },
+            handleAgentOrderPageChange(page) {
+                this.agentOrderForm.page = page
+                this.getAgentOrderList();
+            },
+            // 更多的方法
+            handleMore(event, row) {
+                if (event == 'order') {
+                    this.agentOrderForm.user_id = row.user_id
+                    this.agentOrderDialogVisible = true
+                    this.getAgentOrderList()
+                } else if (event == 'cancel') {
+                    this.$confirm('此操作将取消推广员资格, 是否继续?', '提示', {
+                        confirmButtonText: '确定',
+                        cancelButtonText: '取消',
+                        type: 'warning'
+                    }).then(async () => {
+                        let res = await request.get("/addons/agent/admin.agentUser/del", {user_id: row.user_id})
+                        if (res.code == 0) {
+                            this.$message.success(res.msg)
+                            this.getList()
+                        } else {
+                            this.$message.error(res.msg)
+                        }
+                    }).catch(() => {});
+                } else if (event == 'level') {
+                    this.getAgentLevel()
+                    this.nowUser = row
+                    this.levelDialogVisible = true
+                }
+            },
+            async getAgentLevel() {
+                let res = await request.get("/addons/agent/admin.agentUser/level")
+                this.levelMap = res.data
+            },
+            // 修改等级
+            async updateLevel() {
+                let res = await request.post("/addons/agent/admin.agentUser/level", {level_id: this.agentLevel, user_id: this.nowUser.user_id})
+                if (res.code == 0) {
+
+                    this.$message.success(res.msg)
+                    this.getList()
+                    this.levelDialogVisible = false
+                } else {
+                    this.$message.error(res.msg)
+                }
+            }
+        }
+    });
+</script>
+<style>
+    .el-table__header tr,
+    .el-table__header th {
+        padding: 0;
+        height: 20px;
+        line-height: 20px;
+    }
+    p { padding: 0;
+        margin: 0;}
+    .el-dropdown-link {
+        cursor: pointer;
+        color: #409EFF;
+    }
+
+    .el-icon-arrow-down {
+        font-size: 12px;
+    }
+    .el-card__body, .el-main {padding: 5px 20px 10px 20px}
+    .el-card__header {padding: 20px 20px 10px 20px}
+    .function-card {height: 93px;text-align: center;background: #fff;}
+    .icon-style {font-size:28px;margin-top: 20px;color:#66B1FF}
+    a{text-decoration:none;color:#000;}
+    .function-card p {margin-top:8px;font-size:14px}
+</style>
+</body>
+</html>

@@ -1,0 +1,160 @@
+{include file="/admin/components/title"}
+{include file="/admin/components/notice"}
+{include file="/admin/components/slider"}
+{include file="/admin/components/goods"}
+{include file="/admin/components/picMagic"}
+{include file="/admin/components/cate"}
+{include file="/admin/components/blank"}
+{include file="/admin/components/coupon"}
+{include file="/admin/components/seckill"}
+{include file="/admin/components/home"}
+{include file="/admin/components/line"}
+{include file="/admin/components/news"}
+{include file="/admin/components/sliderGroup"}
+<script>
+    const componentsForms = {
+        title : {
+            type: 'cTitle',
+            title: '标题', // 标题
+            content: '标题',
+            link: '', // 链接
+            bgColor: '#fff', // 背景色
+            fontColor: '#000', // 字体颜色
+            textAlign: 'left', // 文字位置
+            textStyle: 'normal', // 文字样式
+            bgStyle: 'square', // 背景样式
+            bgMargin: 0, // 背景边距
+            fontSize: 12, // 文本大小
+            pageMargin: 0 // 页面间距
+        },
+        notice: {
+            type: 'notice',
+            title: '新闻公告', // 标题
+            icon: '/static/admin/default/image/notice_02.png',
+            content: [
+                {
+                    title: '',
+                    link: ''
+                }
+            ],
+            bgColor: '#fff', // 背景色
+            fontColor: '#000', // 字体颜色
+            textAlign: 'left', // 文字位置
+            textStyle: 'normal', // 文字样式
+            bgStyle: 'square', // 背景样式
+            bgMargin: 0, // 背景边距
+            fontSize: 12, // 文本大小
+            pageMargin: 0 // 页面间距
+        },
+        slider: {
+            title: '轮播图',
+            type: 'cSlider',
+            content: [
+                {
+                    title: '',
+                    link: '',
+                    pic: ''
+                }
+            ],
+            sliderStyle: 'square', // 轮播图样式
+            borderMargin: 10, // 左右边距
+            pageMargin: 2, // 页面间距
+        },
+        goods: {
+            type: 'goods',
+            title: '商品列表', // 标题
+            cate_id: '', // 商品分类
+            sortType: 'common', // 排序方式
+            num: 6, // 商品数量
+            show_title: 1, // 显示名称
+            show_origin_price: 1, // 是否显示原价
+            show_price: 1, // 显示价格
+            lineNum: 1, // 显示类型
+            bgColor: '#fff', // 背景颜色
+            priceColor: '#e93323', // 价格颜色
+            bgStyle: 'square', // 背景样式
+            bgMargin: 10 // 背景边距
+        },
+        picMagic: {
+            type: 'picMagic',
+            title: '图片魔方', // 标题
+            style: 1, // 样式一
+            link: '', // 链接
+            bgColor: '#fff', // 背景颜色
+            bgStyle: 'square', // 背景样式
+            bgMargin: 0, // 背景边距
+            pageMargin: 0, // 页面间距
+            images: [], // 图片
+        },
+        cate: {
+            type: 'cate',
+            title: '商品分类', // 标题
+            fontColor: '#fff',
+            bgColor1: '#f62c2c',
+            bgColor2: '#f96e29',
+            pageMargin: 0 // 页面间距
+        },
+        blank: {
+            type: 'blank',
+            title: '辅助空白', // 标题
+            bgColor: '#fff',
+            height: 10 // 组件高度
+        },
+        line: {
+            type: 'cLine',
+            title: '辅助线', // 标题
+            lineColor: '#F5F5F5',
+            lineType: 1, // 线条样式
+            height: 1, // 组件高度
+            margin: 0, // 左右边距
+            padding: 0, // 页面边距
+        },
+        coupon: {
+            type: 'coupon',
+            title: '优惠券', // 标题
+            bgColor: '#fff', // 背景颜色
+            themeColor: '#e93323', // 主题颜色
+            bgStyle: 'square', // 背景样式
+            bgMargin: 0, // 背景边距
+            pageMargin: 0 // 页面间距
+        },
+        seckill: {
+            type: 'seckill',
+            title: '整点秒杀', // 标题
+            num: 0, // 数量
+            show_title: 1, // 是否显示名称
+            show_price: 1, // 是否显示价格
+            bgColor: '#fff', // 背景色
+            fontColor: '#000', // 字体颜色
+            bgStyle: 'square', // 背景样式
+            bgMargin: 0, // 背景边距
+            fontSize: 12, // 文本大小
+            pageMargin: 0 // 页面间距
+        },
+        news: {
+            type: 'news',
+            title: '新闻列表', // 标题
+            cate_id: '', // 分类id
+            num: 3, // 文章数量
+            bgColor: '#fff',
+            fontColor: '#000', // 字体颜色
+            textAlign: 'left', // 文字位置
+            bgStyle: 'square', // 背景样式
+            bgMargin: 0, // 背景边距
+            fontSize: 12, // 文本大小
+            pageMargin: 0 // 页面间距
+        },
+        sliderGroup: {
+            title: '导航组',
+            type: 'sliderGroup',
+            content: [],
+            num: 5,
+            bgColor: '#fff',
+            iconColor: '#FF4500',
+            iconSize: 35,
+            fontSize: 14,
+            borderMargin: 10, // 左右边距
+            pageMargin: 2, // 页面间距
+        }
+    };
+</script>

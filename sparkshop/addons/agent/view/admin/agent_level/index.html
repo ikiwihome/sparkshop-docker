@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>分销等级</title>
+    <link rel="stylesheet" href="{__CSS__}/element_ui.css"/>
+    <link rel="stylesheet" href="{__CSS__}/style.css"/>
+    <script src="{__JS__}/vue2.js"></script>
+    <script src="{__JS__}/element_ui.js"></script>
+    <script src="{__JS__}/axios.min.js"></script>
+    <script src="{__JS__}/request.js"></script>
+</head>
+<body>
+<div id="app">
+    <div class="app-loading" v-if="pageLoading">
+        <div class="app-loading__logo">
+            <img src="{__IMG__}/logo.png"/>
+        </div>
+        <div class="app-loading__loader"></div>
+        <div class="app-loading__title">SparkShop</div>
+    </div>
+    <el-card class="box-card" v-else>
+        <div slot="header" class="clearfix">
+            <span>分销等级</span>
+        </div>
+        <el-button type="primary" icon="el-icon-plus" size="small" @click="addLevel" style="margin-top: 10px">添加等级</el-button>
+        <div style="width:100%;height:0;border-bottom:#E4E7ED 1px dashed;margin-top: 15px"></div>
+        <el-table
+                :data="tableData"
+                style="width: 100%;">
+            <el-table-column
+                    type=""
+                    prop="id"
+                    label="ID">
+            </el-table-column>
+            <el-table-column
+                    prop="level"
+                    label="等级">
+            </el-table-column>
+            <el-table-column
+                    prop="name"
+                    label="等级名称">
+            </el-table-column>
+            <el-table-column
+                    prop="percent"
+                    label="上浮比例">
+            </el-table-column>
+            <el-table-column
+                    prop="tips"
+                    label="升级条件">
+            </el-table-column>
+            <el-table-column
+                    prop="operation"
+                    label="操作">
+                <template slot-scope="scope">
+                    <el-button @click="handleEdit(scope.row)" type="text" size="small">编辑</el-button>
+                    <el-button @click="handleDel(scope.row)" type="text" size="small" v-if="scope.row.id > 1">删除</el-button>
+                </template>
+            </el-table-column>
+        </el-table>
+        <el-pagination
+                style="margin-top: 10px"
+                background
+                layout="->, prev, pager, next"
+                :page-size="searchForm.limit"
+                @current-change="handlePageChange"
+                :total="total">
+        </el-pagination>
+
+        <el-dialog :title="title" :visible.sync="dialogVisible" width="1000px" :close-on-click-modal="false">
+            {include file="admin/agent_level/save"}
+        </el-dialog>
+    </el-card>
+</div>
+
+<script>
+    new Vue({
+        el: '#app',
+        data: function () {
+            return {
+                pageLoading: true,
+                searchForm: {
+                    limit: 15,
+                    page: 1
+                },
+                dialogVisible: false,
+                title: '添加分销等级',
+                total: 1,
+                tableData: [],
+                dialogCateVisible: false,
+                form: {
+                    id: 0,
+                    level: '一级',
+                    name: '',
+                    percent: 0.1,
+                    level_up_way: 1,
+                    config: ''
+                },
+                rules: {
+                    level: [
+                        { required: true, message: '等级值', trigger: 'blur' }
+                    ],
+                    name: [
+                        { required: true, message: '等级名称', trigger: 'blur' }
+                    ],
+                    percent: [
+                        { required: true, message: '返佣比例', trigger: 'blur' }
+                    ],
+                    level_up_way: [
+                        { required: true, message: '升级方式', trigger: 'blur' }
+                    ]
+                },
+                loading: false,
+                levelUpTips: [
+                    {name: '提成单数', field: 'agent_num', value: 0},
+                    {name: '提成金额', field: 'agent_amount', value: 0},
+                    {name: '自购单数', field: 'self_buy_num', value: 0},
+                    {name: '自购金额', field: 'self_buy_amount', value: 0},
+                    {name: '分销人数', field: 'agent_person_num', value: 0}
+                ],
+                checkedMap: [],
+                checkedTipsMap: []
+            }
+        },
+        mounted() {
+            this.getList()
+            this.pageLoading = false
+        },
+        methods: {
+            // 获取列表
+            async getList() {
+                let res = await request.get('/addons/agent/admin.agentLevel/index', this.searchForm)
+                this.tableData = res.data.data
+                this.total = res.data.total
+            },
+            // 添加分销等级
+            addLevel() {
+                this.title = '添加分销等级'
+                this.dialogVisible = true
+                this.checkedTipsMap = []
+                this.checkedMap = []
+
+                this.form = this.$options.data().form
+            },
+            // 搜索
+            onSubmit() {
+                this.searchForm.page = 1
+                this.getList()
+            },
+            // 编辑参数
+            handleEdit(row) {
+                this.title = '编辑分销等级'
+                this.dialogVisible = true
+
+                delete row.tips
+                this.form = row
+
+                this.checkedTipsMap = [];
+                this.checkedMap = JSON.parse(row.config);
+                this.checkedMap.forEach(item => {
+                    this.checkedTipsMap.push(item.field)
+                })
+            },
+            // 删除参数
+            handleDel(item) {
+                this.$confirm('此操作将永久删除该分销等级, 是否继续?', '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning'
+                }).then(async () => {
+                    let res = await request.get('/addons/agent/admin.agentLevel/del', {id: item.id})
+                    if (res.code == 0) {
+                        this.$message.success(res.msg)
+                        this.getList()
+                    } else {
+                        this.$message.error(res.msg)
+                    }
+                }).catch(() => {});
+            },
+            // 分页
+            handlePageChange(page) {
+                this.searchForm.page = page
+                this.getList()
+            },
+            // 选择的条件
+            checkedTips(val) {
+                this.checkedMap = []
+                this.levelUpTips.forEach(item => {
+                    if (val.indexOf(item.field) != -1) {
+                        this.checkedMap.push(item)
+                    }
+                })
+            },
+            // 新增或编辑
+            optSubmit(formName) {
+                this.$refs[formName].validate(async (valid) => {
+                    if (valid) {
+                        this.loading = true
+                        let res;
+                        this.form.config = this.checkedMap
+                        if (this.form.id) {
+                            res = await request.post("/addons/agent/admin.agentLevel/edit", this.form)
+                        } else {
+                            res = await request.post("/addons/agent/admin.agentLevel/add", this.form)
+                        }
+                        this.loading = false
+                        if (res.code == 0) {
+                            this.dialogVisible = false
+                            this.$message.success(res.msg)
+                            this.getList()
+                        } else {
+                            this.$message.error(res.msg)
+                        }
+                    }
+                });
+            }
+        }
+    });
+</script>
+<style>
+    .el-table__header tr,
+    .el-table__header th {
+        padding: 0;
+        height: 20px;
+        line-height: 20px;
+    }
+    p { padding: 0;
+        margin: 0;}
+</style>
+</body>
+</html>
