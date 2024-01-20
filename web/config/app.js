@@ -10,8 +10,8 @@
 
 module.exports = {
 	// 请求域名
-	// BASE_URL: `http://www.mysp.com`,
-	BASE_URL: `http://www.mysp.com`,
+	// BASE_URL: `hhttps://mall.ikiwi.cc`,
+	BASE_URL: `https://mall.ikiwi.cc`,
 	// 以下配置在不做二开的前提下,不需要做任何的修改
 	HEADER: {
 		'Content-type': 'application/json',

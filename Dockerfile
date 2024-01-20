@@ -30,7 +30,6 @@ RUN apk add autoconf gcc g++ make && pecl install redis && docker-php-ext-enable
 
 # 复制目录到镜像
 COPY ./sparkshop /app/sparkshop
-COPY ./web /app/web
 COPY ./nginx /etc/nginx
 
 # 为app和nginx目录脚本添加权限

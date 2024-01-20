@@ -78,8 +78,6 @@ class Index extends BaseController
         return json(dataReturn(0, 'success', [
             ['icon' => 'iconfont icon-fenlei', 'link' => '/pages/category/category', 'title' => '分类'],
             ['icon' => 'iconfont icon-shoucang', 'link' => '/pages/user/collection', 'title' => '收藏'],
-            ['icon' => 'iconfont icon-youhuiquan', 'link' => '/pages/coupon/index', 'title' => '优惠券'],
-            ['icon' => 'iconfont icon-miaosha', 'link' => '/pages/seckill/index', 'title' => '秒杀'],
             ['icon' => 'iconfont icon-dingdan', 'link' => '/pages/order/order?status=-1', 'title' => '订单']
         ]));
     }

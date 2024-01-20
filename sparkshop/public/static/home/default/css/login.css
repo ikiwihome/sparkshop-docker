@@ -15,7 +15,7 @@ html, body {
 .banner {
     width: 375px;
     height: 100%;
-    background: #1E9FFF;
+    background-image: url(/static/admin/default/image/auth_banner.jpg);
     background-size: 100% 100%;
 }
 
@@ -162,7 +162,7 @@ html, body {
     position: absolute;
     display: block;
     bottom: 50px;
-    left: 50px;
+    left: 114px;
 }
 
 .shop-title {
@@ -170,5 +170,5 @@ html, body {
     position: absolute;
     display: block;
     bottom: 80px;
-    left: 92px;
+    left: 140px;
 }

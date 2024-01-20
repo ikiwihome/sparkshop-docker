@@ -104,10 +104,6 @@
 			<view style="background: #fff;margin-top: 10px;">
 				<text style="position: relative;top: 10px;left: 10px;">我的服务</text>
 				<view class="user-menus">
-					<view class="user-item" @click="navTo('/pages/coupon/index')" hover-class="common-hover" :hover-stay-time="50" v-if="sysConfig.coupon == 1">
-						<uni-icons custom-prefix="iconfont" type="icon-youhuiquan" size="30" color="$icon-color" class="icon-class"></uni-icons>
-						<text>我的卡券</text>
-					</view>
 					<view class="user-item" @click="navTo('/pages/address/address')" hover-class="common-hover" :hover-stay-time="50">
 						<uni-icons custom-prefix="iconfont" type="icon-dizhi" size="30" color="$icon-color" class="icon-class"></uni-icons>
 						<text>我的地址</text>
@@ -116,10 +112,6 @@
 						<uni-icons custom-prefix="iconfont" type="icon-jifen" size="30" color="$icon-color" class="icon-class"></uni-icons>
 						<text>积分记录</text>
 					</view>
-					<!--<view class="user-item" @click="navTo('/pages/address/address')" hover-class="common-hover" :hover-stay-time="50">
-						<uni-icons custom-prefix="iconfont" type="icon-huiyuanzhongxin" size="30" color="$icon-color" class="icon-class"></uni-icons>
-						<text>我的会员</text>
-					</view>-->
 					<view class="user-item" @click="navTo('/pages/user/collection')" hover-class="common-hover" :hover-stay-time="50">
 						<uni-icons custom-prefix="iconfont" type="icon-shoucang" size="30" color="$icon-color" class="icon-class"></uni-icons>
 						<text>我的收藏</text>
@@ -140,7 +132,6 @@
 				</view>
 			</view>
 		</view>
-		<view class="copyright">本系统由 SparkShop 强力驱动</view>
     </view>  
 </template>  
 <script>  

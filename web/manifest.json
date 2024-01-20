@@ -1,8 +1,8 @@
 {
-    "name" : "SparkShop商城",
-    "appid" : "__UNI__1563610",
+    "name" : "星光商城",
+    "appid" : "__UNI__D5C0B76",
     "description" : "",
-    "versionName" : "1.1.2",
+    "versionName" : "1.0.0",
     "versionCode" : "100",
     "transformPx" : false,
     "app-plus" : {
@@ -71,9 +71,11 @@
     "mp-weixin" : {
         /* 小程序特有相关 */
         "usingComponents" : true,
-        "appid" : "wx566ecdaccfbc286c",
+        "appid" : "wx00dc901f7a2a9f2d",
         "setting" : {
             "urlCheck" : true
         }
-    }
+    },
+    "locale" : "zh-Hans",
+    "fallbackLocale" : "en"
 }

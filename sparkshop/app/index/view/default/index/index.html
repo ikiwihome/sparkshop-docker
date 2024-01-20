@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <title>sparkshop商城</title>
+    <title>星光商城 - 照亮你的品质生活</title>
     <meta name="description" content=""/>
     <meta name="keywords" content="">
     <link rel="stylesheet" href="/static/js/layui/css/layui.css">
@@ -19,155 +19,12 @@
     <style>#navbarSupportedContent {margin-left: 260px}</style>
 </head>
 <body>
-{include file="public/header_nav"}
-<!-- 幻灯片 -->
-<section class="hero-slider-area hero-slider-area-style-two" style="background: #f9f9f9">
-    <div class="slider">
-        <div class="swiper" style="height: 100%;width: 100%">
-            <div class="swiper-wrapper">
-                {foreach name="flash" item="vo"}
-                <div class="swiper-slide" style="background: url({$vo['pic_url']}) no-repeat;background-size:100% 100%;"></div>
-                {/foreach}
-            </div>
-            <div class="swiper-pagination"></div>
-        </div>
-    </div>
-</section>
-<!-- 幻灯片 -->
-<!-- 精品推荐 -->
-<section class="best-seller-area pb-30" style="background: #f9f9f9;padding-top: 30px">
-    <div class="container">
-        <div class="section-title">
-            <h2>精品推荐</h2>
-        </div>
-        <div class="row">
-            <div class="col-lg-12">
-                <div class="featured-product-wrap">
-                    <div class="featured-product-slider owl-carousel owl-theme owl-loaded owl-drag">
-                        <div class="owl-stage-outer">
-                            <div class="owl-stage">
-                                {foreach name="recommend" item="vo" key="key"}
-                                <div class="owl-item active" style="width: 306px;{if $key > 0}margin-left: 22px{/if}">
-                                    <div class="single-products">
-                                        <div class="product-img" style="height: 200px">
-                                            <a href="/index/goods/{$vo['id']}">
-                                                <img src="{$vo['pic']}" alt="{$vo['name']}">
-                                            </a>
-                                            <span class="hot">推荐</span>
-                                        </div>
-                                        <div class="product-content" style="background: #fff">
-                                            <a href="/index/goods/{$vo['id']}" class="title">{$vo['name']}</a>
-                                            <ul class="products-rating">
-                                                <li>
-                                                    <a href="/index/goods/{$vo['id']}">(销量：{$vo['sales']})</a>
-                                                </li>
-                                            </ul>
-                                            <ul class="products-price">
-                                                <li>￥{$vo['price']}
-                                                    <del>￥{$vo['original_price']}</del>
-                                                </li>
-                                            </ul>
-                                        </div>
-                                    </div>
-                                </div>
-                                {/foreach}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
-<!-- 精品推荐 -->
-<!-- 限时秒杀 -->
-<section class="flash-deals-area ptb-54" style="background: #f9f9f9;">
-    <div class="container">
-        <div class="row">
-            <div class="col-lg-12">
-                <div class="section-title">
-                    <h2>限时秒杀</h2>
-                    <div class="more-goods">
-                        <a href="/index/seckill" target="_blank">查看更多 <i class="layui-icon layui-icon-next" style="font-size: 14px;"></i> </a>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-lg-3">
-                        <div class="seckill-data" style="height: 382px">
-                            <div class="timeCurrent">
-                                <div style="font-size: 24px">{$seckillHour}:00 点场</div>
-                            </div>
-                            <div class="lines"></div>
-                            <div class="tip">距离结束还剩</div>
-                            <div class="time">
-                                <div class="styleAll hour">00</div>
-                                <div class="timeTxt"> :</div>
-                                <div class="styleAll minute">00</div>
-                                <div class="timeTxt"> :</div>
-                                <div class="styleAll second">00</div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-lg-9" style="display: flex;margin-left: -14px">
-                        {foreach name="seckillList" item="vo" key="key"}
-                        <div class="owl-item" style="width: 306px;{if $key != 0}margin-left: 10px{/if}">
-                            <div class="single-products">
-                                <div class="product-img" style="height: 200px;">
-                                    <a href="/index/seckill/{$vo['id']}">
-                                        <img src="{$vo['pic']}" alt="Image">
-                                    </a>
-                                </div>
-                                <div class="product-content" style="background: #fff">
-                                    <a href="/index/seckill/{$vo['id']}" class="title">{$vo['name']}</a>
-                                    <ul class="products-rating">
-                                        <li>
-                                            限量 {$vo['stock']}
-                                        </li>
-                                    </ul>
-                                    <ul class="products-price">
-                                        <li>￥ {$vo['seckill_price']}
-                                            <del>￥ {$vo['original_price']}</del>
-                                        </li>
-                                    </ul>
-                                    <div class="row">
-                                        <div class="col-lg-9"  style="padding-top: 8px;">
-                                            <div class="layui-progress layui-progress-big" lay-showPercent="yes">
-                                                <div class="layui-progress-bar layui-bg-red" lay-percent="{:round($vo['sales'] / $vo['stock'], 2) * 100}%"></div>
-                                            </div>
-                                        </div>
-                                        <div class="col-lg-3">
-                                            <a href="/index/seckill/{$vo['id']}" class="layui-btn layui-btn-danger layui-btn-sm">抢购</a>
-                                        </div>
-                                    </div>
-
-                                </div>
-                            </div>
-                        </div>
-                        {/foreach}
-                        {if empty($seckillList)}
-                        <div class="empty-seckill">
-                            <img src="{__IMG__}/empty.png"/>
-                            <p>该场次暂无秒杀商品</p>
-                        </div>
-                        {/if}
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
-<!-- 限时秒杀 -->
+{include file="public/header_no_nav"}
 <!-- 分类商品展示 -->
 <section class="featured-products-area pb-30" style="background: #f9f9f9;">
     <div class="container">
         <div class="row">
             <div class="col-lg-12">
-                <div class="section-title">
-                    <h2 style="width: 100px">数码办公</h2>
-                    <div class="more-goods">
-                        <a href="/index/cate">查看更多 <i class="layui-icon layui-icon-next" style="font-size: 14px;"></i> </a>
-                    </div>
-                </div>
                 <div class="featured-product-wrap">
                     <div class="featured-product-slider owl-carousel owl-theme owl-loaded owl-drag">
                         <div class="owl-stage-outer">
@@ -206,88 +63,6 @@
     </div>
 </section>
 <!-- 分类商品展示 -->
-<!-- 资讯模块 -->
-<section class="featured-products-area pb-30" style="background: #f9f9f9;">
-    <div class="container">
-        <div class="row">
-            <div class="section-title">
-                <h2 style="width: 100px">新闻资讯</h2>
-            </div>
-            <div class="col-lg-12" style="display:flex;justify-content: space-between;">
-                <div class="news_card">
-                    <div class="news_card_header" style="background-image:url(/static/home/default/image/news-1.png)">
-                        <div class="card_info">
-                            <p class="en_info">Function Update</p>
-                            <div class="flex align-center">
-                                <span class="card_info_tit">功能更新</span>
-                                <p class="keyword m-l-10"> | 功能更新</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="news_card_body">
-                        {if !empty($updateNews)}
-                        <div class="list p-t-20">
-                            {foreach name="updateNews" item="vo"}
-                            <p class="flex flex-justify-between align-center">
-                                <span class="article-time">{$vo['create_time']|date="m-d"}</span>
-                                <a class="new_info " href="/index/article/detail/id/{$vo['id']}" target="_blank" title="{$vo['title']}">{$vo['title']}</a>
-                            </p>
-                            {/foreach}
-                        </div>
-                        {/if}
-                    </div>
-                </div>
-                <div class="news_card" style="margin-left: 50px;">
-                    <div class="news_card_header" style="background-image:url(/static/home/default/image/news-2.png)">
-                        <div class="card_info">
-                            <p class="en_info">Company Dynamics</p>
-                            <div class="flex align-center">
-                                <span class="card_info_tit">公司新闻</span>
-                                <p class="keyword m-l-10"> | 公司新闻</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="news_card_body">
-                        {if !empty($companyNews)}
-                        <div class="list p-t-20">
-                            {foreach name="companyNews" item="vo"}
-                            <p class="flex flex-justify-between align-center">
-                                <span class="article-time">{$vo['create_time']|date="m-d"}</span>
-                                <a class="new_info " href="/index/article/detail/id/{$vo['id']}" target="_blank" title="{$vo['title']}">{$vo['title']}</a>
-                            </p>
-                            {/foreach}
-                        </div>
-                        {/if}
-                    </div>
-                </div>
-                <div class="news_card" style="margin-left: 50px;">
-                    <div class="news_card_header" style="background-image:url(/static/home/default/image/news-3.png)">
-                        <div class="card_info">
-                            <p class="en_info">Industry News</p>
-                            <div class="flex align-center">
-                                <span class="card_info_tit">行业新闻</span>
-                                <p class="keyword m-l-10"> | 行业新闻</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="news_card_body">
-                        {if !empty($news)}
-                        <div class="list p-t-20">
-                            {foreach name="news" item="vo"}
-                            <p class="flex flex-justify-between align-center">
-                                <span class="article-time">{$vo['create_time']|date="m-d"}</span>
-                                <a class="new_info " href="/index/article/detail/id/{$vo['id']}" target="_blank" title="{$vo['title']}">{$vo['title']}</a>
-                            </p>
-                            {/foreach}
-                        </div>
-                        {/if}
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
-<!-- 资讯模块 -->
 <!-- 底部 -->
 {include file="public/footer"}
 

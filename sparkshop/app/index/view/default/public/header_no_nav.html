@@ -18,8 +18,8 @@
                                 {if empty($userInfo['id'])}
                                 <a href="/index/login/index" target="_blank">登录/注册</a>
                                 {else /}
-                                <span style="color:#555555;font-size: 13px">您好, {$userInfo['name']} </span>&nbsp;&nbsp;&nbsp;
-                                <a href="/index/user" class="user_center">个人中心</a> &nbsp;&nbsp;&nbsp;
+                                <span style="color:#555555;font-size: 13px">您好, {$userInfo['name']}
+                                </span>&nbsp;&nbsp;&nbsp; <a href="/index/user" class="user_center">个人中心</a> &nbsp;&nbsp;&nbsp;
                                 <a href="/index/login/loginOut" class="user_out">退出</a>
                                 {/if}
                             </li>
@@ -63,7 +63,7 @@
                         </li>-->
                         <li>
                             <span class="cart" onclick="window.location.href='/index/cart/detail'">
-                              <span class="wish-icon">
+                                <span class="wish-icon">
                                   <i class="iconfont icon-gouwuche"></i>
                                   <span class="count" id="cartCount">{$cartNum}</span>
                                 </span>
@@ -83,7 +83,7 @@
             <div class="container">
                 <nav class="navbar navbar-expand-md navbar-light">
                     <div class="collapse navbar-collapse mean-menu" id="navbarSupportedContent">
-                        <ul class="navbar-nav" style="margin-left: 344px">
+                        <ul class="navbar-nav">
                             <li class="nav-item float-end">
                                 <a href="/" class="nav-link active">
                                     首页
@@ -92,11 +92,6 @@
                             <li class="nav-item mega-menu">
                                 <a href="/index/cate" class="nav-link">
                                     产品分类
-                                </a>
-                            </li>
-                            <li class="nav-item mega-menu">
-                                <a href="/index/seckill" class="nav-link">
-                                    限时秒杀
                                 </a>
                             </li>
                         </ul>
