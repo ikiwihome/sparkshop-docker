@@ -6,6 +6,8 @@ use Qiniu\Auth;
 use Qiniu\Config;
 use Qiniu\Http\Error;
 use Qiniu\Http\Client;
+use Qiniu\Http\Proxy;
+use Qiniu\Http\Response;
 
 /**
  * 主要涉及了空间资源管理及批量操作接口的实现，具体的接口规格可以参考
@@ -16,15 +18,22 @@ final class BucketManager
 {
     private $auth;
     private $config;
+    private $proxy;
 
-    public function __construct(Auth $auth, Config $config = null)
-    {
+    public function __construct(
+        Auth $auth,
+        Config $config = null,
+        $proxy = null,
+        $proxy_auth = null,
+        $proxy_user_password = null
+    ) {
         $this->auth = $auth;
         if ($config == null) {
             $this->config = new Config();
         } else {
             $this->config = $config;
         }
+        $this->proxy = new Proxy($proxy, $proxy_auth, $proxy_user_password);
     }
 
     /**
@@ -39,7 +48,7 @@ final class BucketManager
         if ($shared === true) {
             $includeShared = "true";
         }
-        return $this->getV2($this->config->getUcHost(). '/buckets?shared=' . $includeShared);
+        return $this->getV2($this->config->getUcHost() . '/buckets?shared=' . $includeShared);
     }
 
     /**
@@ -155,6 +164,8 @@ final class BucketManager
     /**
      * 列取空间的文件列表
      *
+     * @deprecated API 可能返回仅包含 marker，不包含 item 或 dir 的项，请使用 {@link listFiles}
+     *
      * @param string $bucket 空间名
      * @param string $prefix 列举前缀
      * @param string $marker 列举标识符
@@ -181,7 +192,11 @@ final class BucketManager
         \Qiniu\setWithoutEmpty($query, 'skipconfirm', $skipconfirm);
         $path = '/v2/list?' . http_build_query($query);
 
-        list($host, $err) = $this->config->getRsfHostV2($this->auth->getAccessKey(), $bucket);
+        list($host, $err) = $this->config->getRsfHostV2(
+            $this->auth->getAccessKey(),
+            $bucket,
+            $this->proxy->makeReqOpt()
+        );
 
         if ($err != null) {
             return array(null, $err);
@@ -189,7 +204,7 @@ final class BucketManager
 
         $url = $host . $path;
         $headers = $this->auth->authorizationV2($url, 'POST', null, 'application/x-www-form-urlencoded');
-        $ret = Client::post($url, null, $headers);
+        $ret = Client::post($url, null, $headers, $this->proxy->makeReqOpt());
         if (!$ret->ok()) {
             return array(null, new Error($url, $ret));
         }
@@ -201,18 +216,23 @@ final class BucketManager
     /**
      * 增加bucket生命规则
      *
-     * @param string $bucket 空间名
-     * @param string $name 规则名称 bucket 内唯一，长度小于50，不能为空，只能为
-     * 字母、数字、下划线
-     * @param string $prefix 同一个 bucket 里面前缀不能重复
-     * @param int $delete_after_days 指定上传文件多少天后删除，指定为0表示不删除,
-     * 大于0表示多少天后删除,需大于 to_line_after_days
-     * @param int $to_line_after_days 指定文件上传多少天后转低频存储。指定为0表示
-     * 不转低频存储，小于0表示上传的文件立即变低频存储
-     * @param int $to_archive_after_days 指定文件上传多少天后转归档存储。指定为0表示
-     * 不转归档存储，小于0表示上传的文件立即变归档存储
-     * @param int $to_deep_archive_after_days 指定文件上传多少天后转深度归档存储。指定为0表示
-     * 不转深度归档存储，小于0表示上传的文件立即变深度归档存储
+     * @param string $bucket
+     * 空间名
+     * @param string $name
+     * 规则名称 bucket 内唯一，长度小于50，不能为空，只能为字母、数字、下划线
+     * @param string $prefix
+     * 同一个 bucket 里面前缀不能重复
+     * @param int $delete_after_days
+     * 指定上传文件多少天后删除，指定为0表示不删除，大于0表示多少天后删除。
+     * 需大于 to_line_after_days
+     * @param int $to_line_after_days
+     * 指定文件上传多少天后转低频存储。指定为0表示不转低频存储
+     * @param int $to_archive_ir_after_days
+     * 指定文件上传多少天后转归档直读。指定为0表示不转归档直读
+     * @param int $to_archive_after_days
+     * 指定文件上传多少天后转归档存储。指定为0表示不转归档存储
+     * @param int $to_deep_archive_after_days
+     * 指定文件上传多少天后转深度归档存储。指定为0表示不转深度归档存储
      * @return array
      */
     public function bucketLifecycleRule(
@@ -222,7 +242,8 @@ final class BucketManager
         $delete_after_days = null,
         $to_line_after_days = null,
         $to_archive_after_days = null,
-        $to_deep_archive_after_days = null
+        $to_deep_archive_after_days = null,
+        $to_archive_ir_after_days = null
     ) {
         $path = '/rules/add';
         $params = array();
@@ -241,6 +262,9 @@ final class BucketManager
         if ($to_line_after_days) {
             $params['to_line_after_days'] = $to_line_after_days;
         }
+        if ($to_archive_ir_after_days) {
+            $params['to_archive_ir_after_days'] = $to_archive_ir_after_days;
+        }
         if ($to_archive_after_days) {
             $params['to_archive_after_days'] = $to_archive_after_days;
         }
@@ -255,18 +279,23 @@ final class BucketManager
     /**
      * 更新bucket生命规则
      *
-     * @param string $bucket 空间名
-     * @param string $name 规则名称 bucket 内唯一，长度小于50，不能为空，只能为字母、
-     * 数字、下划线
-     * @param string $prefix 同一个 bucket 里面前缀不能重复
-     * @param int $delete_after_days 指定上传文件多少天后删除，指定为0表示不删除，
-     * 大于0表示多少天后删除，需大于 to_line_after_days
-     * @param int $to_line_after_days 指定文件上传多少天后转低频存储。指定为0表示不
-     * 转低频存储，小于0表示上传的文件立即变低频存储
-     * @param int $to_archive_after_days 指定文件上传多少天后转归档存储。指定为0表示
-     * 不转归档存储，小于0表示上传的文件立即变归档存储
-     * @param int $to_deep_archive_after_days 指定文件上传多少天后转深度归档存储。指定为0表示
-     * 不转深度归档存储，小于0表示上传的文件立即变深度归档存储
+     * @param string $bucket
+     * 空间名
+     * @param string $name
+     * 规则名称 bucket 内唯一，长度小于50，不能为空，只能为字母、数字、下划线
+     * @param string $prefix
+     * 同一个 bucket 里面前缀不能重复
+     * @param int $delete_after_days
+     * 指定上传文件多少天后删除，指定为0表示不删除，大于0表示多少天后删除
+     * 需大于 to_line_after_days
+     * @param int $to_line_after_days
+     * 指定文件上传多少天后转低频存储。指定为0表示不转低频存储
+     * @param int $to_archive_ir_after_days
+     * 指定文件上传多少天后转归档只读。指定为0表示不转归档只读
+     * @param int $to_archive_after_days
+     * 指定文件上传多少天后转归档存储。指定为0表示不转归档存储
+     * @param int $to_deep_archive_after_days
+     * 指定文件上传多少天后转深度归档存储。指定为0表示不转深度归档存储
      * @return array
      */
     public function updateBucketLifecycleRule(
@@ -276,7 +305,8 @@ final class BucketManager
         $delete_after_days = null,
         $to_line_after_days = null,
         $to_archive_after_days = null,
-        $to_deep_archive_after_days = null
+        $to_deep_archive_after_days = null,
+        $to_archive_ir_after_days = null
     ) {
         $path = '/rules/update';
         $params = array();
@@ -294,6 +324,9 @@ final class BucketManager
         }
         if ($to_line_after_days) {
             $params['to_line_after_days'] = $to_line_after_days;
+        }
+        if ($to_archive_ir_after_days) {
+            $params['to_archive_ir_after_days'] = $to_archive_ir_after_days;
         }
         if ($to_archive_after_days) {
             $params['to_archive_after_days'] = $to_archive_after_days;
@@ -710,6 +743,7 @@ final class BucketManager
      *   1 表示低频存储；
      *   2 表示归档存储；
      *   3 表示深度归档存储；
+     *   4 表示归档直读存储；
      *
      * @return array
      * @link  https://developer.qiniu.com/kodo/api/3710/chtype
@@ -775,7 +809,7 @@ final class BucketManager
         $ak = $this->auth->getAccessKey();
 
 
-        list($ioHost, $err) = $this->config->getIovipHostV2($ak, $bucket);
+        list($ioHost, $err) = $this->config->getIovipHostV2($ak, $bucket, $this->proxy->makeReqOpt());
         if ($err != null) {
             return array(null, $err);
         }
@@ -797,7 +831,12 @@ final class BucketManager
      * @param string $callbackbody 回调Body
      * @param string $callbackbodytype 回调Body内容类型,默认为"application/x-www-form-urlencoded"
      * @param string $callbackhost 回调时使用的Host
-     * @param int $file_type 存储文件类型 0:标准存储(默认),1:低频存储,2:归档存储
+     * @param int $file_type 存储文件类型
+     *   0:标准存储(默认)
+     *   1:低频存储
+     *   2:归档存储
+     *   3:深度归档存储
+     *   4:归档直读存储
      * @param bool $ignore_same_key 如果空间中已经存在同名文件则放弃本次抓取
      * @return array
      * @link  https://developer.qiniu.com/kodo/api/4097/asynch-fetch
@@ -877,7 +916,7 @@ final class BucketManager
         $path = '/prefetch/' . $resource;
 
         $ak = $this->auth->getAccessKey();
-        list($ioHost, $err) = $this->config->getIovipHostV2($ak, $bucket);
+        list($ioHost, $err) = $this->config->getIovipHostV2($ak, $bucket, $this->proxy->makeReqOpt());
 
         if ($err != null) {
             return array(null, $err);
@@ -910,7 +949,20 @@ final class BucketManager
             $scheme = "https://";
         }
         $params = 'op=' . implode('&op=', $operations);
-        return $this->postV2($scheme . Config::RS_HOST . '/batch', $params);
+        $errResp = new Response(0, 0);
+        if (count($operations) <= 0) {
+            $errResp->error = 'empty operations';
+            return array(null, new Error($scheme . '/batch', $errResp));
+        }
+        $bucket = '';
+        foreach ($operations as $op) {
+            $segments = explode('/', $op);
+            if (count($segments) < 3) {
+                continue;
+            }
+            list($bucket,) = \Qiniu\decodeEntry($segments[2]);
+        }
+        return $this->rsPost($bucket, '/batch', $params);
     }
 
     /**
@@ -938,6 +990,9 @@ final class BucketManager
      * @param int $to_line_after_days 多少天后将文件转为低频存储。
      *   -1 表示取消已设置的转低频存储的生命周期规则；
      *   0 表示不修改转低频生命周期规则。
+     * @param int $to_archive_ir_after_days 多少天后转为归档直读存储。
+     *   -1 表示取消已设置的转归档直读存储的生命周期规则；
+     *   0 表示不修改转归档直读生命周期规则。
      * @param int $to_archive_after_days 多少天后将文件转为归档存储。
      *   -1 表示取消已设置的转归档存储的生命周期规则；
      *   0 表示不修改转归档生命周期规则。
@@ -955,7 +1010,8 @@ final class BucketManager
         $to_line_after_days = 0,
         $to_archive_after_days = 0,
         $to_deep_archive_after_days = 0,
-        $delete_after_days = 0
+        $delete_after_days = 0,
+        $to_archive_ir_after_days = 0
     ) {
         return $this->setObjectLifecycleWithCond(
             $bucket,
@@ -964,7 +1020,8 @@ final class BucketManager
             $to_line_after_days,
             $to_archive_after_days,
             $to_deep_archive_after_days,
-            $delete_after_days
+            $delete_after_days,
+            $to_archive_ir_after_days
         );
     }
 
@@ -976,6 +1033,9 @@ final class BucketManager
      * @param int $to_line_after_days 多少天后将文件转为低频存储。
      *   设置为 -1 表示取消已设置的转低频存储的生命周期规则；
      *   0 表示不修改转低频生命周期规则。
+     * @param int $to_archive_ir_after_days 多少天后将文件转为归档直读存储。
+     *   设置为 -1 表示取消已设置的转归档直读存储的生命周期规则；
+     *   0 表示不修改转归档直读生命周期规则。
      * @param int $to_archive_after_days 多少天后将文件转为归档存储。
      *   -1 表示取消已设置的转归档存储的生命周期规则；
      *   0 表示不修改转归档生命周期规则。
@@ -996,11 +1056,13 @@ final class BucketManager
         $to_line_after_days = 0,
         $to_archive_after_days = 0,
         $to_deep_archive_after_days = 0,
-        $delete_after_days = 0
+        $delete_after_days = 0,
+        $to_archive_ir_after_days = 0
     ) {
         $encodedEntry = \Qiniu\entry($bucket, $key);
         $path = '/lifecycle/' . $encodedEntry .
             '/toIAAfterDays/' . $to_line_after_days .
+            '/toArchiveIRAfterDays/' . $to_archive_ir_after_days .
             '/toArchiveAfterDays/' . $to_archive_after_days .
             '/toDeepArchiveAfterDays/' . $to_deep_archive_after_days .
             '/deleteAfterDays/' . $delete_after_days;
@@ -1017,7 +1079,11 @@ final class BucketManager
 
     private function rsfGet($bucket, $path)
     {
-        list($host, $err) = $this->config->getRsfHostV2($this->auth->getAccessKey(), $bucket);
+        list($host, $err) = $this->config->getRsfHostV2(
+            $this->auth->getAccessKey(),
+            $bucket,
+            $this->proxy->makeReqOpt()
+        );
 
         if ($err != null) {
             return array(null, $err);
@@ -1028,7 +1094,11 @@ final class BucketManager
 
     private function rsGet($bucket, $path)
     {
-        list($host, $err) = $this->config->getRsHostV2($this->auth->getAccessKey(), $bucket);
+        list($host, $err) = $this->config->getRsHostV2(
+            $this->auth->getAccessKey(),
+            $bucket,
+            $this->proxy->makeReqOpt()
+        );
 
         if ($err != null) {
             return array(null, $err);
@@ -1039,7 +1109,11 @@ final class BucketManager
 
     private function rsPost($bucket, $path, $body = null)
     {
-        list($host, $err) = $this->config->getRsHostV2($this->auth->getAccessKey(), $bucket);
+        list($host, $err) = $this->config->getRsHostV2(
+            $this->auth->getAccessKey(),
+            $bucket,
+            $this->proxy->makeReqOpt()
+        );
 
         if ($err != null) {
             return array(null, $err);
@@ -1050,7 +1124,11 @@ final class BucketManager
 
     private function apiGet($bucket, $path)
     {
-        list($host, $err) = $this->config->getApiHostV2($this->auth->getAccessKey(), $bucket);
+        list($host, $err) = $this->config->getApiHostV2(
+            $this->auth->getAccessKey(),
+            $bucket,
+            $this->proxy->makeReqOpt()
+        );
 
         if ($err != null) {
             return array(null, $err);
@@ -1062,7 +1140,11 @@ final class BucketManager
     private function apiPost($bucket, $path, $body = null)
     {
 
-        list($host, $err) = $this->config->getApiHostV2($this->auth->getAccessKey(), $bucket);
+        list($host, $err) = $this->config->getApiHostV2(
+            $this->auth->getAccessKey(),
+            $bucket,
+            $this->proxy->makeReqOpt()
+        );
 
         if ($err != null) {
             return array(null, $err);
@@ -1086,7 +1168,7 @@ final class BucketManager
     private function getV2($url)
     {
         $headers = $this->auth->authorizationV2($url, 'GET', null, 'application/x-www-form-urlencoded');
-        $ret = Client::get($url, $headers);
+        $ret = Client::get($url, $headers, $this->proxy->makeReqOpt());
         if (!$ret->ok()) {
             return array(null, new Error($url, $ret));
         }
@@ -1096,7 +1178,7 @@ final class BucketManager
     private function postV2($url, $body)
     {
         $headers = $this->auth->authorizationV2($url, 'POST', $body, 'application/x-www-form-urlencoded');
-        $ret = Client::post($url, $body, $headers);
+        $ret = Client::post($url, $body, $headers, $this->proxy->makeReqOpt());
         if (!$ret->ok()) {
             return array(null, new Error($url, $ret));
         }
@@ -1148,6 +1230,9 @@ final class BucketManager
      * @param int $to_line_after_days 多少天后将文件转为低频存储。
      *   -1 表示取消已设置的转低频存储的生命周期规则；
      *   0 表示不修改转低频生命周期规则。
+     * @param int $to_archive_ir_after_days 多少天后将文件转为归档直读。
+     *    -1 表示取消已设置的转归档只读的生命周期规则；
+     *    0 表示不修改转归档只读周期规则。
      * @param int $to_archive_after_days 多少天后将文件转为归档存储。
      *   -1 表示取消已设置的转归档存储的生命周期规则；
      *   0 表示不修改转归档生命周期规则。
@@ -1166,13 +1251,15 @@ final class BucketManager
         $to_line_after_days,
         $to_archive_after_days,
         $to_deep_archive_after_days,
-        $delete_after_days
+        $delete_after_days,
+        $to_archive_ir_after_days = 0
     ) {
         $result = array();
         foreach ($keys as $key) {
             $encodedEntry = \Qiniu\entry($bucket, $key);
             $op = '/lifecycle/' . $encodedEntry .
                 '/toIAAfterDays/' . $to_line_after_days .
+                '/toArchiveIRAfterDays/' . $to_archive_ir_after_days .
                 '/toArchiveAfterDays/' . $to_archive_after_days .
                 '/toDeepArchiveAfterDays/' . $to_deep_archive_after_days .
                 '/deleteAfterDays/' . $delete_after_days;

@@ -48,9 +48,7 @@ class LogServiceProvider implements ServiceProviderInterface
     public function formatLogConfig($app)
     {
         if (!empty($app['config']->get('log.channels'))) {
-            return [
-                'log' => $app['config']->get('log'),
-            ];
+            return $app['config']->get('log');
         }
 
         if (empty($app['config']->get('log'))) {

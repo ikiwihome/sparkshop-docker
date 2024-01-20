@@ -107,7 +107,7 @@ class Connection
      *
      * @var bool
      */
-    protected $order_asc = true;
+    protected $order_asc = null;
     /**
      * SELECT 多少记录
      *
@@ -1020,6 +1020,7 @@ class Connection
      */
     public function orderBy(array $cols)
     {
+        $this->order_asc = null;
         return $this->addOrderBy($cols);
     }
 
@@ -1212,12 +1213,15 @@ class Connection
         if (!$this->order_by) {
             return '';
         }
-
-        if ($this->order_asc) {
-            return ' ORDER BY' . $this->indentCsv($this->order_by) . ' ASC';
+        
+        $r = ' ORDER BY' . $this->indentCsv($this->order_by);
+        if(isset($this->order_asc)) {
+            $r .= ($this->order_asc)? ' ASC' : ' DESC';
         } else {
-            return ' ORDER BY' . $this->indentCsv($this->order_by) . ' DESC';
+            // depend on devloper if $this->order_asc is not set.
+            // devloper can call function orderBy() to set $this->order_by.
         }
+        return $r;
     }
 
     /**
@@ -1764,7 +1768,9 @@ class Connection
                     throw $ex;
                 }
             } else {
-                $this->rollBackTrans();
+                if ($this->db) {
+                     $this->rollBackTrans();
+                }
                 $msg = $e->getMessage();
                 $err_msg = "SQL:".$this->lastSQL()." ".$msg;
                 $exception = new \PDOException($err_msg, (int)$e->getCode());
@@ -1816,7 +1822,14 @@ class Connection
     {
         $query = trim($query);
         if (empty($query)) {
-            $query = $this->build();
+            
+            $union = '';
+            if (! empty($this->union)) {
+                $union = implode(PHP_EOL, $this->union) . PHP_EOL;
+            }
+
+            $query = $union . $this->build();
+            
             if (!$params) {
                 $params = $this->getBindValues();
             }
@@ -1856,7 +1869,14 @@ class Connection
     {
         $query = trim($query);
         if (empty($query)) {
-            $query = $this->build();
+            
+            $union = '';
+            if (! empty($this->union)) {
+                $union = implode(PHP_EOL, $this->union) . PHP_EOL;
+            }
+
+            $query = $union . $this->build();
+            
             if (!$params) {
                 $params = $this->getBindValues();
             }
@@ -1886,7 +1906,14 @@ class Connection
     {
         $query = trim($query);
         if (empty($query)) {
-            $query = $this->build();
+            
+            $union = '';
+            if (! empty($this->union)) {
+                $union = implode(PHP_EOL, $this->union) . PHP_EOL;
+            }
+
+            $query = $union . $this->build();
+            
             if (!$params) {
                 $params = $this->getBindValues();
             }
@@ -1910,7 +1937,14 @@ class Connection
     {
         $query = trim($query);
         if (empty($query)) {
-            $query = $this->build();
+            
+            $union = '';
+            if (! empty($this->union)) {
+                $union = implode(PHP_EOL, $this->union) . PHP_EOL;
+            }
+
+            $query = $union . $this->build();
+            
             if (!$params) {
                 $params = $this->getBindValues();
             }

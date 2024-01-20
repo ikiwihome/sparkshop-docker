@@ -157,8 +157,4 @@ class ServiceContainer extends Container
             parent::register(new $provider());
         }
     }
-
-    public function getClient () {
-        return new BaseClient($this);
-    }
 }
