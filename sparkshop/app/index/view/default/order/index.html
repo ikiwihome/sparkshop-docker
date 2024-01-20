@@ -59,24 +59,6 @@
                 {/foreach}
             </div>
         </div>
-        {if $type == 1}
-        <div class="detail-section">
-            <div class="section-options section-shipment">
-                <div class="options-desc options-header">
-                    <div class="title">优惠券</div>
-                </div>
-                <div class="options-desc options-body">
-                    <div class="options-list" style="height: 50px">
-                        <a href="javascript:;" style="position: absolute;color:#e93323;" onclick="checkCoupon()">选择</a>
-                        <div id="coupon_list">
-
-                        </div>
-                    </div>
-
-                </div>
-            </div>
-        </div>
-        {/if}
         <div class="detail-section">
             <div class="section-options section-shipment">
                 <div class="options-desc options-header">
@@ -111,17 +93,11 @@
                     <div class="bill-name">商品总价：</div>
                     <div class="bill-money" id="goods-price"></div>
                 </div>
-                {if $type == 1}
-                <div class="bill-item">
-                    <div class="bill-name">优惠券抵扣：</div>
-                    <div class="bill-money" id="goods-coupon"></div>
-                </div>
                 {if $vipConf['user_level_open'] ==1}
                 <div class="bill-item">
                     <div class="bill-name">会员折扣：</div>
                     <div class="bill-money" id="goods-vip">0</div>
                 </div>
-                {/if}
                 {/if}
                 <div class="bill-item">
                     <div class="bill-name">运费：</div>

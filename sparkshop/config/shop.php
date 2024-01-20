@@ -5,7 +5,7 @@ return [
     'salt' => 'q3lba23#$MOy10',
 
     // 标题
-    'title' => 'SparkShop商城系统',
+    'title' => '星火商城',
 
     // 是否开启开发模式
     'is_open_debug' => true,

@@ -65,10 +65,6 @@
 				<text class="cell-tit clamp">配送运费:</text>
 				<text class="cell-tip">￥{{ orderInfo.pay_postage }}</text>
 			</view>
-			<view class="yt-list-cell" v-if="couponOpen == 1">
-				<text class="cell-tit clamp">优惠券抵扣:</text>
-				<text class="cell-tip">-￥{{ orderInfo.coupon_amount }}</text>
-			</view>
 			<view class="yt-list-cell" v-if="userVipOpen == 1">
 				<text class="cell-tit clamp">会员折扣:</text>
 				<text class="cell-tip">-￥{{ orderInfo.vip_discount }}</text>

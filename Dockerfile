@@ -29,7 +29,7 @@ RUN apk add autoconf gcc g++ make && pecl install redis && docker-php-ext-enable
     && apk del autoconf gcc g++ make && rm -rf /var/cache/apk/* /tmp/*
 
 # 复制目录到镜像
-COPY ./sparkshop /app/sparkshop
+COPY ./sparkshop /app
 COPY ./nginx /etc/nginx
 
 # 为app和nginx目录脚本添加权限
@@ -43,7 +43,7 @@ COPY entrypoint.sh /entrypoint.sh
 RUN ["chmod", "+x", "/entrypoint.sh"]
 
 # 设置工作目录
-WORKDIR /app/sparkshop
+WORKDIR /app
 
 EXPOSE 80
 

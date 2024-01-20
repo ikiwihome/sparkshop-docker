@@ -31,32 +31,11 @@
 			</view>
 			
 		</view>
-
-		<!-- 优惠明细 -->
-		<view class="yt-list" v-if="couponOpen == 1">
-			<view class="yt-list-cell b-b" @click="toggleMask('show')">
-				<view class="cell-icon">
-					券
-				</view>
-				<text class="cell-tit clamp">优惠券</text>
-				<text class="cell-tip active" v-if="trailData.coupon == 0">
-					选择优惠券
-				</text>
-				<text class="cell-tip active" v-else>
-					{{ checkedCouponName }}
-				</text>
-				<text class="cell-more wanjia wanjia-gengduo-d"></text>
-			</view>
-		</view>
 		<!-- 金额明细 -->
 		<view class="yt-list">
 			<view class="yt-list-cell b-b">
 				<text class="cell-tit clamp">商品金额</text>
 				<text class="cell-tip">￥{{ orderInfo.totalPrice }}</text>
-			</view>
-			<view class="yt-list-cell b-b" v-if="trailData.coupon !=''">
-				<text class="cell-tit clamp">优惠券抵扣</text>
-				<text class="cell-tip red">-￥{{ orderInfo.coupon }}</text>
 			</view>
 			<view class="yt-list-cell b-b" v-if="userVipOpen == 1">
 				<text class="cell-tit clamp">会员折扣</text>
@@ -108,35 +87,6 @@
 				<text class="price">{{ orderInfo.realPay }}</text>
 			</view>
 			<text class="submit" @click="submit">提交订单</text>
-		</view>
-		
-		<!-- 优惠券面板 -->
-		<view class="mask" :class="maskState===0 ? 'none' : maskState===1 ? 'show' : ''" @click="toggleMask">
-			<view class="mask-content" @click.stop.prevent="stopPrevent">
-				<view class="coupon-item" v-for="(item,index) in couponList" :key="index">
-					<view class="con">
-						<view class="left">
-							<text class="title">{{item.name}}</text>
-							<text class="time" v-if="item.validity_type == 1">{{ item.start_time }}至{{ item.end_time }}</text>
-							<text class="time" v-else>领取后{{ item.receive_useful_day }}日内可用</text>
-						</view>
-						<view class="right">
-							<text class="price" v-if="item.type == 1">{{parseFloat(item.amount)}}</text>
-							<text class="discount" v-else>{{item.discount * 100}}折</text>
-							<text v-if="item.is_threshold == 1">满{{ parseFloat(item.threshold_amount) }}元可用</text>
-							<text v-else>无门槛</text>
-						</view>
-						
-						<view class="circle l"></view>
-						<view class="circle r"></view>
-					</view>
-					<view class="tips">
-						<view class="btn" @click="checkCoupon(item)">使用</view>
-					</view>
-				</view>
-				
-				<xw-empty :isShow="couponList.length == 0" text="暂无可用的优惠券" textColor="#777777"></xw-empty>
-			</view>
 		</view>
 	</view>
 </template>
@@ -211,18 +161,6 @@
 				let res = await this.$api.order.getConfig.get()
 				this.userVipOpen = res.data.userVip
 				this.couponOpen = res.data.coupon
-			},
-			// 显示优惠券面板
-			async toggleMask(type) {
-				let timer = type === 'show' ? 10 : 300;
-				let	state = type === 'show' ? 1 : 0;
-				this.maskState = 2;
-				setTimeout(() => {
-					this.maskState = state;
-				}, timer)
-			},
-			numberChange(data) {
-				this.number = data.number;
 			},
 			async submit() {
 				uni.showLoading({
@@ -394,19 +332,6 @@
 			//选择支付方式
 			changePayType(type) {
 				this.trailData.pay_way = type;
-			},
-			// 优惠券列表
-			async getValidCoupon() {
-				let res = await this.$api.coupon.validCoupon.post({goods: JSON.stringify(this.trailData.goods), amount: this.orderInfo.totalPrice})
-				this.couponList = res.data
-			},
-			// 选则使用优惠券
-			checkCoupon(item) {
-				this.checkedCouponName = item.name
-				this.trailData.coupon = item.code
-				this.maskState = 0
-				
-				this.trail('ck')
 			},
 			stopPrevent(){},
 			// 关闭弹窗
