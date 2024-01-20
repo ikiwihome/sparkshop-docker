@@ -51,7 +51,9 @@
             "ios" : {},
             /* ios打包配置 */
             "sdkConfigs" : {
-                "oauth" : {},
+                "oauth" : {
+                    "univerify" : {}
+                },
                 "payment" : {
                     "alipay" : {
                         "__platform__" : [ "ios", "android" ]
