@@ -14,10 +14,6 @@ RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.cloud.tencent.com/g' /etc/apk/repos
 RUN apk update
 RUN apk add --update --no-cache bash nano curl wget tzdata libzip-dev freetype-dev libjpeg-turbo-dev libpng-dev redis nginx openrc su-exec
 
-# 复制php.ini
-# RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
-COPY ./php.ini $PHP_INI_DIR/php.ini
-
 # 安装gd mysqli pdo pdo_mysql fileinfo exif扩展
 RUN docker-php-ext-install mysqli pdo pdo_mysql fileinfo exif \
 	&& docker-php-ext-configure gd --with-freetype=/usr/include/freetype2/ --with-jpeg=/usr/include/ \
@@ -35,6 +31,10 @@ COPY ./nginx /etc/nginx
 # 为app和nginx目录脚本添加权限
 RUN chmod 777 -R /app
 RUN chmod 755 -R /etc/nginx
+
+# 复制php.ini
+# RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
+COPY ./php.ini $PHP_INI_DIR/php.ini
 
 # 复制entrypoint.sh脚本到容器中的entrypoint.sh路径
 COPY entrypoint.sh /entrypoint.sh

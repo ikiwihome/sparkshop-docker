@@ -5,7 +5,7 @@ return [
     'salt' => 'q3lba23#$MOy10',
 
     // 标题
-    'title' => '星火商城',
+    'title' => '西方甄选',
 
     // 是否开启开发模式
     'is_open_debug' => true,
