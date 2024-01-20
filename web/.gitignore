@@ -1,5 +1,6 @@
 .hbuilderx
 unpackage
+uni_modules
 .DS_Store
 
 node_modules

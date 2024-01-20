@@ -12,7 +12,6 @@
 							"backgroundColor": "rgb(246, 249, 255)",
 							"borderRadius": "16px",
 							"placeholder": "请输入内容 如：iphone",
-							"disabled": false,
 							"placeholderColor": "#606266"
 						},
 						"buttons": [
