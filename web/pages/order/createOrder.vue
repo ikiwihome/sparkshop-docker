@@ -333,6 +333,19 @@
 			changePayType(type) {
 				this.trailData.pay_way = type;
 			},
+			// 优惠券列表
+			async getValidCoupon() {
+				let res = await this.$api.coupon.validCoupon.post({goods: JSON.stringify(this.trailData.goods), amount: this.orderInfo.totalPrice})
+				this.couponList = res.data
+			},
+			// 选则使用优惠券
+			checkCoupon(item) {
+				this.checkedCouponName = item.name
+				this.trailData.coupon = item.code
+				this.maskState = 0
+				
+				this.trail('ck')
+			},
 			stopPrevent(){},
 			// 关闭弹窗
 			closeDialog() {

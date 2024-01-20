@@ -5,6 +5,7 @@
 			"path": "pages/index/index",
 			"style": {
 				"navigationBarTitleText": "西方甄选",
+				//"navigationStyle": "custom",
 				"app-plus": {
 					"titleNView": {
 						"type": "transparent",
@@ -74,7 +75,9 @@
 			"path": "pages/user/user",
 			"style": {
 				"navigationBarTitleText": "我的",
+				// #ifdef MP
 				"navigationStyle": "custom",
+				// #endif
 				"app-plus": {
 					"bounce": "none",
 					"titleNView": {
@@ -181,33 +184,6 @@
 				"navigationBarTitleText": "商品列表"
 			}
         },
-		{
-		    "path" : "pages/seckill/index",
-		    "style" : {
-				"enablePullDownRefresh": true,
-				"navigationBarTitleText": "限时秒杀"
-			}
-		},
-		{
-		    "path" : "pages/seckill/product",
-		    "style" : {
-				"enablePullDownRefresh": true,
-				"navigationBarTitleText": "秒杀商品"
-			}
-		},
-		{
-		    "path" : "pages/seckill/createOrder",
-		    "style" : {
-				"enablePullDownRefresh": true,
-				"navigationBarTitleText": "秒杀下单"
-			}
-		},
-		{
-		    "path" : "pages/coupon/index",
-		    "style" : {
-				"navigationBarTitleText": "我的优惠券"
-			}
-		},
 		{
 		    "path" : "pages/user/collection",
 		    "style" : {
